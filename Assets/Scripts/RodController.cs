@@ -35,6 +35,7 @@ public class RodController : MonoBehaviour
     }
 #endregion
 
+#region Shoot
     private void OnShoot(InputAction.CallbackContext context)
     {
         Debug.Log("Shoot action triggered!");
@@ -59,4 +60,5 @@ public class RodController : MonoBehaviour
             yield return null;
         }
     }
+#endregion
 }
