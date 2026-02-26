@@ -2,15 +2,33 @@ using UnityEngine;
 
 public class FootballPlayerController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+#region Unity Lifecycle 
     void Start()
     {
-        
+        RodController.OnShootEvent += HandleShoot;
     }
 
-    // Update is called once per frame
     void Update()
     {
         
     }
+
+    void OnDestroy()
+    {
+        RodController.OnShootEvent -= HandleShoot;
+    }
+#endregion
+
+#region Collider
+    private void OnCollisionEnter(Collision collision)
+    {
+    }
+#endregion
+
+#region Shoot
+    void HandleShoot(Vector2 shootDirection)
+    {
+
+    }
+#endregion
 }
