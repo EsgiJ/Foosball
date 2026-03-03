@@ -258,11 +258,8 @@ public class RodController : MonoBehaviour
         }
     }
 
-    private Coroutine m_CurrentAnimationCoroutine = null;
-
     private void OnEnterIdle()
     {
-        StopAnimationCoroutine();
         ReleaseBall();
     }
 
@@ -271,36 +268,23 @@ public class RodController : MonoBehaviour
         // Ros defense stance
         // Play animation
         // Ball absorption ready
-        StopAnimationCoroutine();
-        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_DefenseStanceRotationCurve, m_DefenseStanceRotationDuration, m_RodDefenseStanceRotation, ERodState.DefenseStance, false));
+        StartCoroutine(StateAnimationCoroutine(m_DefenseStanceRotationCurve, m_DefenseStanceRotationDuration, m_RodDefenseStanceRotation, ERodState.DefenseStance, false));
     }
 
     private void OnEnterAttackStance()
     {
-        StopAnimationCoroutine();
-        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_AttackStanceRotationCurve, m_AttackStanceRotationDuration, m_RodAttackStanceRotation, ERodState.AttackStance, false));
+        StartCoroutine(StateAnimationCoroutine(m_AttackStanceRotationCurve, m_AttackStanceRotationDuration, m_RodAttackStanceRotation, ERodState.AttackStance, false));
     }
 
     private void OnEnterShooting()
     {
-        StopAnimationCoroutine();
         ReleaseBall();
-        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_ShootRotationCurve, m_ShootRotationDuration, m_RodShootRotation, ERodState.Idle, true));
+        StartCoroutine(StateAnimationCoroutine(m_ShootRotationCurve, m_ShootRotationDuration, m_RodShootRotation, ERodState.Idle, true));
     }
 
     private void OnEnterStunned()
     {
-        StopAnimationCoroutine();
-        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_StunRotationCurve, m_StunRotationDuration, m_RodShootRotation, ERodState.Idle, true));
-    }
-
-    private void StopAnimationCoroutine()
-    {
-        if (m_CurrentAnimationCoroutine != null)
-        {
-            StopCoroutine(m_CurrentAnimationCoroutine);
-            m_CurrentAnimationCoroutine = null;
-        }
+        StartCoroutine(StateAnimationCoroutine(m_StunRotationCurve, m_StunRotationDuration, m_RodShootRotation, ERodState.Idle, true));
     }
 #endregion
 
