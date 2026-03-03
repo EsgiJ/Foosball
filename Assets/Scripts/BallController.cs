@@ -7,8 +7,8 @@ public class BallController : MonoBehaviour
 {
     [UnitHeaderInspectable("Shoot Properties")]
     [SerializeField] private AnimationCurve m_ShootAnimationCurve;
-    [SerializeField, Min(0f)] private float m_ShootDuration = 1f;
-    [SerializeField, Min(0f)] private float m_ShootPower = 20f;
+    [SerializeField, Min(0f)] private float m_ShootDuration = 0.5f;
+    [SerializeField, Min(0f)] private float m_ShootPower = 1000f;
     
     [Header("Collision")]
     [SerializeField] private float m_SphereRadius = 0.6f;
@@ -55,9 +55,9 @@ public class BallController : MonoBehaviour
             m_Rigidbody = gameObject.AddComponent<Rigidbody>();
         }
         
-        m_Rigidbody.isKinematic = true;  
+        m_Rigidbody.isKinematic = false;  
         m_Rigidbody.useGravity = true;
-        m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
         
         SphereCollider collider = GetComponent<SphereCollider>();
         if (collider == null)
@@ -75,41 +75,12 @@ public class BallController : MonoBehaviour
     #region Collision
     private void OnCollisionEnter(Collision collision)
     {
-        /*
-        if (collision.gameObject.CompareTag("Rod_Player"))
-        {  
-            var playerController = collision.gameObject.GetComponent<FootballPlayerController>();
-            if (playerController != null)
-            {
-                RodController rod = playerController.GetRodController();
-                if (rod != null)
-                {
-                    rod.HandleBallContact(this);
-                    
-                    Debug.Log($"Ball collided with rod player");
-                }
-            }
-        }
 
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            ContactPoint contact = collision.GetContact(0);
-            //TODO: Implement wall bounce reflection
-            
-            OnBallImpact?.Invoke(transform.position);
-        }
-        */
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        /*
-        if(collision.gameObject.CompareTag("Rod_Player"))
-        {
-            DetachFromRod();
-            Debug.Log("Ball left football player");
-        }
-        */
+
     }
 #endregion
 
@@ -165,22 +136,12 @@ public class BallController : MonoBehaviour
         /* Wait for shoot animation to finish */
         yield return new WaitForSeconds(RodController.GetShootAnimationDuration());
 
-        float elapsed = 0;
-        while(elapsed < m_ShootDuration)
-        {            
-            Vector3 position = transform.localPosition;
-            
-            elapsed += Time.deltaTime;
-            float t = elapsed / m_ShootDuration;
-            float curveValue = m_ShootAnimationCurve.Evaluate(t);
-
-            position.x += shootDirection.x * curveValue * m_ShootPower * Time.deltaTime;
-            position.z += shootDirection.y * curveValue * m_ShootPower * Time.deltaTime;
-            
-            Debug.Log($"Elapsed: {elapsed:F2}, Curve Value: {curveValue:F2}, New Position: {position}");
-            GetComponent<Rigidbody>().MovePosition(position);
-            yield return null;
-        }
+        Vector3 shootVector = Vector3.zero;
+        
+        shootVector.x = shootDirection.x * m_ShootPower;
+        shootVector.z = shootDirection.y * m_ShootPower;
+        
+        m_Rigidbody.AddForce(shootVector);
 
         /* Detach after the shooting animation is finished*/
         DetachFromRod();

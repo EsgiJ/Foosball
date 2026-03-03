@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 11787023}
   m_Layer: 0
   m_Name: Foosball_Table_Up_Boundary
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -617,7 +617,7 @@ GameObject:
   - component: {fileID: 850073668}
   m_Layer: 0
   m_Name: Foosball_Table_Down_Boundary
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -766,7 +766,7 @@ GameObject:
   - component: {fileID: 1368497854}
   m_Layer: 0
   m_Name: Foosball_Table_Left_Boundary
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1014,7 +1014,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 18165354583059575, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -2.5
       objectReference: {fileID: 0}
     - target: {fileID: 18165354583059575, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1022,7 +1022,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 18165354583059575, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.27
       objectReference: {fileID: 0}
     - target: {fileID: 18165354583059575, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1052,8 +1052,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 88319523257384627, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
+      propertyPath: m_ShootPower
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 918775855270213279, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_Mass
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 918775855270213279, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
+      propertyPath: m_Constraints
+      value: 112
+      objectReference: {fileID: 0}
+    - target: {fileID: 918775855270213279, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
+      propertyPath: m_CollisionDetection
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5335341342303308354, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
@@ -1079,7 +1091,7 @@ GameObject:
   - component: {fileID: 1759688428}
   m_Layer: 0
   m_Name: Foosball_Table_Right_Boundary
-  m_TagString: Untagged
+  m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

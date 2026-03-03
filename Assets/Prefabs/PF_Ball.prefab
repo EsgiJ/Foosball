@@ -186,6 +186,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_ShootDuration: 1
-  m_ShootPower: 20
+  m_ShootDuration: 0.5
+  m_ShootPower: 50
   m_SphereRadius: 0.6
