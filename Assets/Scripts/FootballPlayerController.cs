@@ -6,6 +6,7 @@ public class FootballPlayerController : MonoBehaviour
     [SerializeField] private float m_PlayerRadius = 1f;
     [SerializeField] private float m_PlayerHeight = 1.5f;
 
+    [SerializeField] private float m_BallVelocityThreshold = 10f;
     /* References */
     private RodController m_RodController;
     private Rigidbody m_Rigidbody;
@@ -66,18 +67,27 @@ public class FootballPlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ball"))
         {
-            m_IsTouchingBall = true;
-            
             BallController ball = collision.gameObject.GetComponent<BallController>();
-            if (CanAttachBall(ball))
-            {
-                m_RodController.HandleBallContact(ball);
-            }
-            {
-                m_RodController.HandleBallContact(ball);
-            }
+            Vector3 ballVelocity = ball.GetLinearVelocity();
             
-            Debug.Log($"{gameObject.name} touched ball");
+            Debug.Log($"Received ball velocity: {ballVelocity.magnitude}");
+
+            if(ballVelocity.magnitude > m_BallVelocityThreshold && m_RodController.GetState() != RodController.ERodState.DefenseStance)
+            {
+                m_RodController.HandleStun(ball);
+                Debug.Log($"{gameObject.name} was stunned by the ball with velocity {ballVelocity.magnitude}");
+            }
+            else
+            {
+                m_IsTouchingBall = true;
+                
+                if (CanAttachBall(ball))
+                {
+                    m_RodController.HandleBallContact(ball);
+                }
+                
+                Debug.Log($"{gameObject.name} touched ball");
+            }
         }
     }
 
@@ -85,15 +95,12 @@ public class FootballPlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ball"))
         {
-            m_IsTouchingBall = true;
-            
             BallController ball = collision.gameObject.GetComponent<BallController>();
+        
             if (CanAttachBall(ball))
             {
                 m_RodController.HandleBallContact(ball);
             }
-            
-            Debug.Log($"{gameObject.name} touched ball");
         }
     }
 

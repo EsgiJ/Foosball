@@ -150,6 +150,6 @@ public class BallController : MonoBehaviour
 
 #region Getters
     public bool IsAttachedToRod() => m_IsAttached;
-
+    public Vector3 GetLinearVelocity() => m_Rigidbody.linearVelocity;
 #endregion
 }

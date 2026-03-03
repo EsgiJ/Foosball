@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 6052142203383363986}
   - component: {fileID: 5537797314393105499}
   - component: {fileID: 2160321445552465644}
-  - component: {fileID: 4016646107569714506}
   - component: {fileID: 5448326573206855935}
   m_Layer: 0
   m_Name: PF_Rod
@@ -92,29 +91,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &4016646107569714506
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4956024986374279022}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5000001
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
 --- !u!114 &5448326573206855935
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,6 +108,9 @@ MonoBehaviour:
   m_MaxZPos: 1.5
   m_RodUsableExtent: 10
   m_FootballPlayerCount: 3
+  m_RodDefenseStanceRotation: 0
+  m_RodAttackStanceRotation: 30
+  m_RodShootRotation: -180
   footballPlayer: {fileID: 2537440484156038194, guid: 1fc24ebf1fd7ad94ba784ffb96ee6911, type: 3}
   m_BallController: {fileID: 0}
   m_ShootRotationCurve:
@@ -167,4 +146,102 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_ShootRotationDuration: 0.2
+  m_StunRotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0000018058345
+      value: 1.0004778
+      inSlope: -0.12387147
+      outSlope: -0.12387147
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.1915358
+    - serializedVersion: 3
+      time: 0.7258825
+      value: 0.47688538
+      inSlope: -1.263087
+      outSlope: -1.263087
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.10966709
+      outWeight: 0.26242623
+    - serializedVersion: 3
+      time: 1
+      value: -0.00047302246
+      inSlope: -2.4510071
+      outSlope: -2.4510071
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.23730709
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_DefenseStanceRotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0000018058345
+      value: 1.0004778
+      inSlope: -0.19308467
+      outSlope: -0.19308467
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.25538108
+    - serializedVersion: 3
+      time: 0.720577
+      value: 0.5416348
+      inSlope: -1.4510903
+      outSlope: -1.4510903
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.16562171
+    - serializedVersion: 3
+      time: 1
+      value: -0.00047302246
+      inSlope: -2.4510071
+      outSlope: -2.4510071
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.23730709
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  m_AttackStanceRotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0026570382
+      value: 1.0004778
+      inSlope: -0.14678085
+      outSlope: -0.14678085
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.22620231
+    - serializedVersion: 3
+      time: 0.72854203
+      value: 0.5080587
+      inSlope: -1.2840737
+      outSlope: -1.2840737
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.087038875
+      outWeight: 0.26242623
+    - serializedVersion: 3
+      time: 1
+      value: -0.00047302246
+      inSlope: -2.4510071
+      outSlope: -2.4510071
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.23730709
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

@@ -16,6 +16,11 @@ public class RodController : MonoBehaviour
     [SerializeField, Min(0f)] private float m_RodUsableExtent = 6f;
     [SerializeField, Range(1, 5)] private int m_FootballPlayerCount = 3;
 
+    [SerializeField] private float m_RodDefenseStanceRotation = 0f;
+    [SerializeField] private float m_RodAttackStanceRotation = 30f;
+    [SerializeField] private float m_RodShootRotation = -180f;
+
+    private Quaternion m_StartRotation;
 
     /* References */
     [Header("Ball Reference")]
@@ -38,7 +43,16 @@ public class RodController : MonoBehaviour
     [Header("Animation Properties")]
     [SerializeField] private AnimationCurve m_ShootRotationCurve;
     [SerializeField, Min(0f)] private static float m_ShootRotationDuration = 0.2f;
-     
+
+    [SerializeField] private AnimationCurve m_StunRotationCurve; 
+    [SerializeField, Min(0f)] private static float m_StunRotationDuration = 0.2f;
+    
+    [SerializeField] private AnimationCurve m_DefenseStanceRotationCurve; 
+    [SerializeField, Min(0f)] private static float m_DefenseStanceRotationDuration = 0.2f;
+
+    [SerializeField] private AnimationCurve m_AttackStanceRotationCurve; 
+    [SerializeField, Min(0f)] private static float m_AttackStanceRotationDuration = 0.2f;
+
     /*Events*/
     public static event Action<Vector2> OnShootEvent;
     public static event Action<bool> OnStanceChanged;
@@ -49,7 +63,8 @@ public class RodController : MonoBehaviour
         Idle,
         DefenseStance,
         AttackStance,
-        Shooting
+        Shooting,
+        Stunned
     }
 
     private ERodState m_CurrentRodState = ERodState.Idle;
@@ -68,6 +83,8 @@ public class RodController : MonoBehaviour
         {
             m_BallController = FindObjectsByType<BallController>(FindObjectsSortMode.None)[0];
         }
+
+        m_StartRotation = transform.localRotation;
     }
 
     void Update()
@@ -181,7 +198,6 @@ public class RodController : MonoBehaviour
 
         SetState(ERodState.Shooting);
         OnShootEvent?.Invoke(m_AimVector);
-        StartCoroutine(ShootCoroutine(m_ShootRotationDuration));
 
         m_HasBall = false;
     }
@@ -190,7 +206,7 @@ public class RodController : MonoBehaviour
     {
         m_IsStanceHeld = true;
 
-        if(m_HasBall)
+        if(m_HasBall && m_CurrentRodState != ERodState.AttackStance && m_CurrentRodState != ERodState.Shooting)
         {
             SetState(ERodState.AttackStance);
             OnStanceChanged?.Invoke(true);
@@ -236,11 +252,17 @@ public class RodController : MonoBehaviour
             case ERodState.Shooting:
                 OnEnterShooting();
                 break;
+            case ERodState.Stunned:
+                OnEnterStunned();
+                break;
         }
     }
 
+    private Coroutine m_CurrentAnimationCoroutine = null;
+
     private void OnEnterIdle()
     {
+        StopAnimationCoroutine();
         ReleaseBall();
     }
 
@@ -249,39 +271,61 @@ public class RodController : MonoBehaviour
         // Ros defense stance
         // Play animation
         // Ball absorption ready
+        StopAnimationCoroutine();
+        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_DefenseStanceRotationCurve, m_DefenseStanceRotationDuration, m_RodDefenseStanceRotation, ERodState.DefenseStance, false));
     }
 
     private void OnEnterAttackStance()
     {
-        // Ros defense stance
-        // Play animation 
-        // Aim ready
+        StopAnimationCoroutine();
+        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_AttackStanceRotationCurve, m_AttackStanceRotationDuration, m_RodAttackStanceRotation, ERodState.AttackStance, false));
     }
 
     private void OnEnterShooting()
     {
+        StopAnimationCoroutine();
+        ReleaseBall();
+        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_ShootRotationCurve, m_ShootRotationDuration, m_RodShootRotation, ERodState.Idle, true));
+    }
+
+    private void OnEnterStunned()
+    {
+        StopAnimationCoroutine();
+        m_CurrentAnimationCoroutine = StartCoroutine(StateAnimationCoroutine(m_StunRotationCurve, m_StunRotationDuration, m_RodShootRotation, ERodState.Idle, true));
+    }
+
+    private void StopAnimationCoroutine()
+    {
+        if (m_CurrentAnimationCoroutine != null)
+        {
+            StopCoroutine(m_CurrentAnimationCoroutine);
+            m_CurrentAnimationCoroutine = null;
+        }
     }
 #endregion
 
 #region Coroutines
-    IEnumerator ShootCoroutine(float waitTime = 0.01f)
+    IEnumerator StateAnimationCoroutine(AnimationCurve curve, float rotationDuration, float rotationAngle, ERodState targetState, bool changesRodState= false)
     {
         float elapsed = 0f;
-        Quaternion startRotation = transform.localRotation;
-        Quaternion m_shootTargetRotation = startRotation * Quaternion.Euler(0, -180f, 0);
+        Quaternion m_TargetRotation = m_StartRotation * Quaternion.Euler(0, rotationAngle, 0);
 
-        while(elapsed < m_ShootRotationDuration)
+        while(elapsed < rotationDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / m_ShootRotationDuration;
+            float t = elapsed / rotationDuration;
 
-            float curveValue = m_ShootRotationCurve.Evaluate(t);
+            float curveValue = curve.Evaluate(t);
 
-            transform.localRotation = Quaternion.Lerp(startRotation, m_shootTargetRotation, curveValue);
+            transform.localRotation = Quaternion.Lerp(m_StartRotation, m_TargetRotation, curveValue);
 
             yield return null;
         }
-        SetState(ERodState.Idle);
+
+        transform.localRotation = m_TargetRotation;
+
+        if(changesRodState)
+            SetState(targetState);
     }
 #endregion
 
@@ -291,7 +335,6 @@ public class RodController : MonoBehaviour
         m_OwnedBall = ball;
         m_HasBall = true;   
 
-        Debug.Log($"Rod {gameObject.name} took possession of ball");
         if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
         {
             AttachBallToRod(ball);
@@ -301,6 +344,12 @@ public class RodController : MonoBehaviour
             AttachBallToRod(ball);
         }
     }
+
+    public void HandleStun(BallController ball)
+    {
+        SetState(ERodState.Stunned);
+    }
+
 #endregion
 
     private void AttachBallToRod(BallController ball)

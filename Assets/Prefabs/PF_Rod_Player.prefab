@@ -107,6 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FootballPlayerController
   m_PlayerRadius: 1
   m_PlayerHeight: 1.5
+  m_BallVelocityThreshold: 5
 --- !u!54 &2574957646615849534
 Rigidbody:
   m_ObjectHideFlags: 0
