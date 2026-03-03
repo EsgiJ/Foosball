@@ -133,21 +133,31 @@ MonoBehaviour:
   m_RodUsableExtent: 10
   m_FootballPlayerCount: 3
   footballPlayer: {fileID: 2537440484156038194, guid: 1fc24ebf1fd7ad94ba784ffb96ee6911, type: 3}
-  m_RotationCurve:
+  m_BallController: {fileID: 0}
+  m_ShootRotationCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
+      value: 0.9976196
+      inSlope: -0.116774805
+      outSlope: -0.116774805
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.1233227
     - serializedVersion: 3
-      time: 1
-      value: 1
+      time: 0.6196352
+      value: 0.66135824
+      inSlope: -1.4686047
+      outSlope: -1.4686047
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.9920349
+      value: 0.0071411133
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -157,4 +167,4 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  m_RotationDuration: 0.2
+  m_ShootRotationDuration: 0.2

@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 6310959558066008690}
   - component: {fileID: 8045568823576292029}
   - component: {fileID: 4508127335984337583}
-  - component: {fileID: 2068928249930261345}
   - component: {fileID: 2656106366603430644}
+  - component: {fileID: 2574957646615849534}
+  - component: {fileID: 4712657547939282600}
   m_Layer: 0
   m_Name: PF_Rod_Player
   m_TagString: Rod_Player
@@ -92,8 +93,49 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2068928249930261345
-BoxCollider:
+--- !u!114 &2656106366603430644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2537440484156038194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4d92f02d598d97438a8b30e0aa29a94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FootballPlayerController
+  m_PlayerRadius: 1
+  m_PlayerHeight: 1.5
+--- !u!54 &2574957646615849534
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2537440484156038194}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!136 &4712657547939282600
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -110,18 +152,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.5, y: 1.5, z: 1}
+  serializedVersion: 2
+  m_Radius: 1
+  m_Height: 1.5
+  m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2656106366603430644
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2537440484156038194}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b4d92f02d598d97438a8b30e0aa29a94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FootballPlayerController
