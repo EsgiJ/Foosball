@@ -7,7 +7,6 @@ public class BallController : MonoBehaviour
 {
     [UnitHeaderInspectable("Shoot Properties")]
     [SerializeField] private AnimationCurve m_ShootAnimationCurve;
-    [SerializeField, Min(0f)] private float m_ShootDuration = 0.5f;
     [SerializeField, Min(0f)] private float m_ShootPower = 1000f;
     
     [Header("Collision")]

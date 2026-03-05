@@ -11,6 +11,14 @@ public class FootballPlayerController : MonoBehaviour
     private RodController m_RodController;
     private Rigidbody m_Rigidbody;
     private CapsuleCollider m_Collider;
+    private SpriteRenderer m_SpriteRenderer;
+
+    /* Sprite References*/
+    [Header("Sprites")]
+    [SerializeField] private Sprite m_IdleSprite; 
+    [SerializeField] private Sprite m_StunnedSprite;
+    [SerializeField] private Sprite m_AttackSprite;
+    [SerializeField] private Sprite m_DefenseSprite;
 
     /** State */
     private bool m_IsTouchingBall = false;
@@ -19,7 +27,10 @@ public class FootballPlayerController : MonoBehaviour
     void Start()
     {
         InitializePhysics();
-        InitializeCollider();    
+        InitializeCollider();   
+
+        m_SpriteRenderer = gameObject.transform.Find("State_Indicator").GetComponent<SpriteRenderer>();
+        m_SpriteRenderer.sprite = m_IdleSprite;
     }
 
     void Update()
@@ -131,6 +142,30 @@ public class FootballPlayerController : MonoBehaviour
     }
 #endregion
 
+#region State Management
+    public void ChangeStateSprite(RodController.ERodState state)
+    {
+        switch (state)
+        {
+            case RodController.ERodState.Idle:
+                m_SpriteRenderer.sprite = m_IdleSprite;
+                break;
+            case RodController.ERodState.AttackStance:
+                m_SpriteRenderer.sprite = m_AttackSprite;
+                break;
+            case RodController.ERodState.DefenseStance:
+                m_SpriteRenderer.sprite = m_DefenseSprite;
+                break;
+            case RodController.ERodState.Stunned:
+                m_SpriteRenderer.sprite = m_StunnedSprite;
+                break;
+            case RodController.ERodState.Shooting:
+                m_SpriteRenderer.sprite = m_AttackSprite;
+                break;
+        }
+    }
+
+#endregion
 #region Getters
     public RodController GetRodController() => m_RodController;
     public bool IsTouchingBall() => m_IsTouchingBall;

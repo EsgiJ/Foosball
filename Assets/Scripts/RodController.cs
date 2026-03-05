@@ -46,7 +46,8 @@ public class RodController : MonoBehaviour
 
     [SerializeField] private AnimationCurve m_StunRotationCurve; 
     [SerializeField, Min(0f)] private static float m_StunRotationDuration = 0.2f;
-    
+    [SerializeField, Min(0f)] private static float m_StunDuration = 2f;
+
     [SerializeField] private AnimationCurve m_DefenseStanceRotationCurve; 
     [SerializeField, Min(0f)] private static float m_DefenseStanceRotationDuration = 0.2f;
 
@@ -55,7 +56,6 @@ public class RodController : MonoBehaviour
 
     /*Events*/
     public static event Action<Vector2> OnShootEvent;
-    public static event Action<bool> OnStanceChanged;
 
     /*State*/
     public enum ERodState
@@ -89,8 +89,11 @@ public class RodController : MonoBehaviour
 
     void Update()
     {
-        HandleMovement();
-        HandleAim();
+        if(m_CurrentRodState != ERodState.Stunned)
+        {
+            HandleMovement();
+            HandleAim();
+        }
     }
 
     void OnDestroy()
@@ -188,13 +191,17 @@ public class RodController : MonoBehaviour
 
     private void OnShootPressed(InputAction.CallbackContext context)
     {
+        if(m_CurrentRodState == ERodState.Stunned)
+        {
+            Debug.Log("Cannot shoot while stunned!");
+            return;
+        }
+
         if(!m_HasBall || m_CurrentRodState != ERodState.AttackStance)
         {
             Debug.Log("Cannot shoot: either no ball or not in attack stance!");
             return;
         }
-
-        Debug.Log("Shoot pressed!");
 
         SetState(ERodState.Shooting);
         OnShootEvent?.Invoke(m_AimVector);
@@ -204,28 +211,31 @@ public class RodController : MonoBehaviour
 
     private void OnStancePressed(InputAction.CallbackContext context)
     {
+        if(m_CurrentRodState == ERodState.Stunned)
+        {
+            Debug.Log("Cannot change stance while stunned!");
+            return;
+        }
+
         m_IsStanceHeld = true;
 
-        if(m_HasBall && m_CurrentRodState != ERodState.AttackStance && m_CurrentRodState != ERodState.Shooting)
-        {
+        if(m_HasBall && m_CurrentRodState != ERodState.Shooting)
             SetState(ERodState.AttackStance);
-            OnStanceChanged?.Invoke(true);
-            Debug.Log("RodState changed to Attack stance");
-        }
         else
-        {
             SetState(ERodState.DefenseStance);
-            OnStanceChanged?.Invoke(false);
-            Debug.Log("RodState changed to Defense stance");
-        }
     }
 
     private void OnStanceReleased(InputAction.CallbackContext context)
     {
+        if(m_CurrentRodState == ERodState.Stunned)
+        {
+            Debug.Log("Cannot change stance while stunned!");
+            return;
+        }
+
         m_IsStanceHeld = false;
 
         SetState(ERodState.Idle);
-        OnStanceChanged?.Invoke(false);
         Debug.Log("RodState changed to Idle");
     }
 #endregion
@@ -237,7 +247,9 @@ public class RodController : MonoBehaviour
         return;
 
         m_CurrentRodState = newRodState;
+        Debug.Log("RodState changed to " + newRodState);
 
+        ChangeSpritesForEachPlayer(newRodState);
         switch(m_CurrentRodState)
         {
             case ERodState.Idle:
@@ -261,35 +273,41 @@ public class RodController : MonoBehaviour
     private void OnEnterIdle()
     {
         ReleaseBall();
+        transform.localRotation = m_StartRotation;
     }
 
     private void OnEnterDefenseStance()
     {
-        // Ros defense stance
-        // Play animation
-        // Ball absorption ready
-        StartCoroutine(StateAnimationCoroutine(m_DefenseStanceRotationCurve, m_DefenseStanceRotationDuration, m_RodDefenseStanceRotation, ERodState.DefenseStance, false));
+        StartCoroutine(DefenseStateCoroutine());
     }
 
     private void OnEnterAttackStance()
     {
-        StartCoroutine(StateAnimationCoroutine(m_AttackStanceRotationCurve, m_AttackStanceRotationDuration, m_RodAttackStanceRotation, ERodState.AttackStance, false));
+        StartCoroutine(AttackStateCoroutine());
     }
 
     private void OnEnterShooting()
     {
-        ReleaseBall();
-        StartCoroutine(StateAnimationCoroutine(m_ShootRotationCurve, m_ShootRotationDuration, m_RodShootRotation, ERodState.Idle, true));
+        StartCoroutine(ShootingStateCoroutine());
     }
 
     private void OnEnterStunned()
     {
-        StartCoroutine(StateAnimationCoroutine(m_StunRotationCurve, m_StunRotationDuration, m_RodShootRotation, ERodState.Idle, true));
+        StartCoroutine(StunStateCoroutine());
+    }
+
+    private void ChangeSpritesForEachPlayer(ERodState state)
+    {
+        foreach(GameObject player in footballPlayers)
+        {
+            FootballPlayerController controller = player.GetComponent<FootballPlayerController>();
+            controller.ChangeStateSprite(state);
+        }
     }
 #endregion
 
 #region Coroutines
-    IEnumerator StateAnimationCoroutine(AnimationCurve curve, float rotationDuration, float rotationAngle, ERodState targetState, bool changesRodState= false)
+    IEnumerator StateAnimationCoroutine(AnimationCurve curve, float rotationDuration, float rotationAngle)
     {
         float elapsed = 0f;
         Quaternion m_TargetRotation = m_StartRotation * Quaternion.Euler(0, rotationAngle, 0);
@@ -298,18 +316,39 @@ public class RodController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = elapsed / rotationDuration;
-
             float curveValue = curve.Evaluate(t);
-
             transform.localRotation = Quaternion.Lerp(m_StartRotation, m_TargetRotation, curveValue);
-
             yield return null;
         }
 
         transform.localRotation = m_TargetRotation;
+    }
 
-        if(changesRodState)
-            SetState(targetState);
+    private IEnumerator DefenseStateCoroutine()
+    {
+        yield return StartCoroutine(StateAnimationCoroutine(m_DefenseStanceRotationCurve, m_DefenseStanceRotationDuration, m_RodDefenseStanceRotation));
+    }
+
+    private IEnumerator AttackStateCoroutine()
+    {
+        yield return StartCoroutine(StateAnimationCoroutine(m_AttackStanceRotationCurve, m_AttackStanceRotationDuration, m_RodAttackStanceRotation));
+    }
+
+    private IEnumerator ShootingStateCoroutine()
+    {
+        ReleaseBall();
+        yield return StartCoroutine(StateAnimationCoroutine(m_ShootRotationCurve, m_ShootRotationDuration, m_RodShootRotation));
+        SetState(ERodState.Idle);
+    }
+
+    private IEnumerator StunStateCoroutine()
+    {
+        yield return StartCoroutine(StateAnimationCoroutine(m_StunRotationCurve, m_StunRotationDuration, m_RodShootRotation));
+
+        float waitTime = Mathf.Max(0f, m_StunDuration - m_StunRotationDuration);
+        yield return new WaitForSeconds(waitTime);
+
+        SetState(ERodState.Idle);
     }
 #endregion
 
