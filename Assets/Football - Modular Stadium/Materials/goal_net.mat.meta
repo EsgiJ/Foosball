@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5bf390490c763c54b9d272ba8bd77ab9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 287782
+  packageName: Football - Modular Stadium
+  packageVersion: 1.0
+  assetPath: Assets/Football - Modular Stadium/Materials/goal_net.mat
+  uploadId: 675525

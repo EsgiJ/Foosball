@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /* TODO
-    * When the rod is not in a stance mode, it should be ruffle and then stunned for a certain amount of time
+    * DONE | When the rod is not in a stance mode, it should be ruffle and then stunned for a certain amount of time
         - Ruffle animation with animation curve
         - Stun unable to move or receive input
         - Show stunned indicator above rod players

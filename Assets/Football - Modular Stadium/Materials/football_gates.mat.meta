@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c67c9447954f33944904ed023e7f2393
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 287782
+  packageName: Football - Modular Stadium
+  packageVersion: 1.0
+  assetPath: Assets/Football - Modular Stadium/Materials/football_gates.mat
+  uploadId: 675525
