@@ -8,7 +8,9 @@ public class TeamController : MonoBehaviour
     /* Team properties*/
     public string teamName = "Default";
     public int score = 0;
-    public RodController[] rodControllers;
+    public RodController[] m_RodControllers;
+
+    private int m_PossedRodIndex = -1;
 
     /* Action properties*/
     [Header("Input Actions")]
@@ -24,7 +26,8 @@ public class TeamController : MonoBehaviour
     void Start()
     {
         DisableAllRodControllers();
-        rodControllers[0].SetPossessed(true);    
+        m_RodControllers[0].SetPossessed(true);   
+        m_PossedRodIndex = 0; 
     }
 
     void Update()
@@ -34,8 +37,6 @@ public class TeamController : MonoBehaviour
             Debug.LogWarning("ChangeRod action not found!");
             return;
         }
-
-        m_ChangeRodAction.performed += ctx => SwitchRod();
     }
 #endregion
 
@@ -48,12 +49,26 @@ public class TeamController : MonoBehaviour
 
     private void SwitchRod()
     {
-        
+        if(m_ChangeRodAction == null)
+        {
+            Debug.LogWarning("ChangeRod action not found!");
+            return;
+        }
+        int direction = m_RodControllers[m_PossedRodIndex].GetAim().x >= 0 ? 1 : -1;
+        int nextRodIndex = (m_PossedRodIndex + direction) % m_RodControllers.Length;
+        PossessRod(nextRodIndex);
+    }
+
+    private void PossessRod(int rodIndex = -1)
+    {
+        m_RodControllers[m_PossedRodIndex].SetPossessed(false); 
+        m_RodControllers[rodIndex].SetPossessed(true); 
+        m_PossedRodIndex = rodIndex; 
     }
 
     private void DisableAllRodControllers()
     {
-        foreach (var rod in rodControllers)
+        foreach (var rod in m_RodControllers)
         {
             rod.SetPossessed(false);
         }

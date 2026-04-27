@@ -75,9 +75,14 @@ public class RodController : MonoBehaviour
 #endregion
 
 #region Unity Lifecycle
+    void Awake()
+    {
+        // This was necessary to ensure that we initialize input before any team tries to possess the rod 
+        InitializeInput();
+    }
+
     void Start()
     {
-        InitializeInput();
         InitializePhysics();
         SpawnFootballPlayers();
 
@@ -114,15 +119,6 @@ public class RodController : MonoBehaviour
         m_MoveAction = InputSystem.actions.FindAction("MoveRod");
         m_AimAction = InputSystem.actions.FindAction("Aim");
         m_StanceAction = InputSystem.actions.FindAction("Stance");
-
-        if (m_ShootAction != null)
-            m_ShootAction.started += OnShootPressed;
-
-        if (m_StanceAction != null)
-        {
-            m_StanceAction.started += OnStancePressed;
-            m_StanceAction.canceled += OnStanceReleased;
-        }
     }
 
     private void InitializePhysics()
@@ -414,5 +410,14 @@ public class RodController : MonoBehaviour
 #region Getters
     public ERodState GetState() => m_CurrentRodState;
     public static float GetShootAnimationDuration() => m_ShootRotationDuration;
+    public Vector2 GetAim()
+    {
+        if(m_AimAction == null)
+        {
+            Debug.LogWarning("Aim action not found!");
+            return Vector2.zero;
+        }
+        return m_AimAction.ReadValue<Vector2>();
+    }
 #endregion
 }
