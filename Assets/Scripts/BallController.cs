@@ -71,13 +71,21 @@ public class BallController : MonoBehaviour
     }
     #endregion
 
-    #region Collision
-    private void OnCollisionEnter(Collision collision)
+#region Collider
+    private void OnTriggerEnter(Collider collision)
     {
+        if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Home"))
+        {
+            GameManager.Instance.ScoreGoal(false);
+        }
 
+        if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Away"))
+        {
+            GameManager.Instance.ScoreGoal(true);
+        }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider collision)
     {
 
     }

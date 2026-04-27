@@ -1,2 +1,15 @@
 fileFormatVersion: 2
 guid: b4d92f02d598d97438a8b30e0aa29a94
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_IdleSprite: {instanceID: 0}
+  - m_StunnedSprite: {fileID: 21300000, guid: 03d87e6442e9a91458d776716c325d74, type: 3}
+  - m_AttackSprite: {fileID: 21300000, guid: 53bd5c2f85c7bf34887a178df5bced05, type: 3}
+  - m_DefenseSprite: {fileID: 21300000, guid: b21a2eeec7a546248bf4554ac694d34e, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

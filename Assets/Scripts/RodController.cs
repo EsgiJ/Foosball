@@ -11,8 +11,8 @@ public class RodController : MonoBehaviour
     /* Rod General Properties */
     [Header("Rod Properties")]
     [SerializeField, Min(0f)] private float m_MovementSpeed = 5f;
-    [SerializeField, Min(0f)] private float m_MinZPos = -1.5f;
-    [SerializeField, Min(0f)] private float m_MaxZPos = 1.5f;
+    [SerializeField] private float m_MinZPos = -3.0f;
+    [SerializeField] private float m_MaxZPos = 3.0f;
     [SerializeField, Min(0f)] private float m_RodUsableExtent = 6f;
     [SerializeField, Range(1, 5)] private int m_FootballPlayerCount = 3;
 
@@ -70,6 +70,8 @@ public class RodController : MonoBehaviour
     private ERodState m_CurrentRodState = ERodState.Idle;
     private bool m_IsStanceHeld = false;
     private bool m_HasBall = false;
+
+    public bool m_RodPossessed = false;
 #endregion
 
 #region Unity Lifecycle
@@ -89,7 +91,7 @@ public class RodController : MonoBehaviour
 
     void Update()
     {
-        if(m_CurrentRodState != ERodState.Stunned)
+        if(m_CurrentRodState != ERodState.Stunned && m_RodPossessed)
         {
             HandleMovement();
             HandleAim();
@@ -98,12 +100,9 @@ public class RodController : MonoBehaviour
 
     void OnDestroy()
     {
-        if (m_ShootAction != null) m_ShootAction.started -= OnShootPressed;
-        if (m_StanceAction != null)
-        {
-            m_StanceAction.started -= OnStancePressed;
-            m_StanceAction.canceled -= OnStanceReleased;
-        }
+        m_ShootAction.started -= OnShootPressed;
+        m_StanceAction.started -= OnStancePressed;
+        m_StanceAction.canceled -= OnStanceReleased;
     }
 #endregion
 
@@ -159,6 +158,24 @@ public class RodController : MonoBehaviour
 #endregion
 
 #region Input Handling
+    public void SetPossessed(bool possessed)
+    {
+        m_RodPossessed = possessed;
+
+    if (possessed)
+    {
+        m_ShootAction.started += OnShootPressed;
+        m_StanceAction.started += OnStancePressed;
+        m_StanceAction.canceled += OnStanceReleased;
+    }
+    else
+    {
+        m_ShootAction.started -= OnShootPressed;
+        m_StanceAction.started -= OnStancePressed;
+        m_StanceAction.canceled -= OnStanceReleased;
+    }
+    }
+
     private void HandleMovement()
     {        
         if(m_MoveAction == null)

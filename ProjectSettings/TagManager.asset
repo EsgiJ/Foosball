@@ -7,6 +7,8 @@ TagManager:
   - Ball
   - Rod_Player
   - Wall
+  - Goal_Trigger_Zone_Home
+  - Goal_Trigger_Zone_Away
   layers:
   - Default
   - TransparentFX

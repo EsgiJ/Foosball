@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 /* TODO
@@ -14,13 +15,81 @@ using UnityEngine;
 */
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
+    [Header("Teams")]
+    [SerializeField] private TeamController m_HomeTeam;
+    [SerializeField] private TeamController m_AwayTeam;
+
+    [Header("Scoreboard")]
+    [SerializeField] private TextMeshPro m_HomeScoreText;
+    [SerializeField] private TextMeshPro m_AwayScoreText;
+#region Unity Lifecycle
+    void Awake()
+    {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
-        
+        InitializeTeams();
+
     }
 
     void Update()
     {
         
     }
+#endregion
+
+    private void InitializeTeams()
+    {
+        ResetGame(); 
+        Debug.Log($"[GameManager] Game started: {m_HomeTeam.teamName} {m_AwayTeam.teamName}");
+    }
+
+    public void ScoreGoal(bool isHome)
+    {
+        if(isHome)
+        {
+            m_HomeTeam.IncrementScore();
+            Debug.Log($"[GameManager] Home Team({m_HomeTeam.teamName}) scored!");
+        }
+        else
+        {
+            m_AwayTeam.IncrementScore();
+            Debug.Log($"[GameManager] Away Team({m_AwayTeam.teamName}) scored!");
+        }
+
+        UpdateScoreboard();
+
+        Debug.Log($"[GameManager] {m_HomeTeam.teamName} {m_HomeTeam.score} - {m_AwayTeam.teamName} {m_AwayTeam.score}");
+    }
+
+    private void ResetGame()
+    {
+        m_HomeTeam.ResetScore();
+        m_AwayTeam.ResetScore();
+
+        UpdateScoreboard();
+
+        Debug.Log($"[GameManager] Game reset: {m_HomeTeam.teamName} {m_AwayTeam.teamName}");
+    }
+
+    private void UpdateScoreboard()
+    {
+        m_HomeScoreText.text = m_HomeTeam.score.ToString();
+        m_AwayScoreText.text = m_AwayTeam.score.ToString();
+    }
+
+#region Getters
+    public TeamController GetHomeTeam() => m_HomeTeam;
+    public TeamController GetAwayTeam() => m_AwayTeam;
+#endregion
 }

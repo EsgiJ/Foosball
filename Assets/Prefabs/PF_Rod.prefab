@@ -106,7 +106,7 @@ MonoBehaviour:
   m_MovementSpeed: 5
   m_MinZPos: -1.5
   m_MaxZPos: 1.5
-  m_RodUsableExtent: 10
+  m_RodUsableExtent: 12
   m_FootballPlayerCount: 3
   m_RodDefenseStanceRotation: 0
   m_RodAttackStanceRotation: 30
