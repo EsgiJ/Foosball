@@ -98,10 +98,11 @@ public class GameManager : MonoBehaviour
             Debug.Log($"[GameManager] Away Team({m_AwayTeam.teamName}) scored!");
         }
 
+        GameJuiceManager.Instance?.ChromaticAberrationEffect();
         GameJuiceManager.Instance?.PauseGame(0.1f);          
         GameJuiceManager.Instance?.SlowMotion(0.3f, 0.6f);  
         GameJuiceManager.Instance?.ShakeCamera(0.5f, 0.6f);
-        
+        GameJuiceManager.Instance?.VignetteEffect();
         UpdateScoreboard();
 
         var scoreText = isHome ? m_HomeScoreText : m_AwayScoreText;

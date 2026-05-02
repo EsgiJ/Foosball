@@ -1234,7 +1234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameJuiceManager
   m_CameraTransform: {fileID: 521237237}
-  m_DefaultHitPauseDuration: 1
+  m_DefaultPauseDuration: 1
   m_SlowMoScale: 0.25
   m_SlowMoEaseIn: 0.1
   m_SlowMoHold: 0.4
@@ -1242,6 +1242,18 @@ MonoBehaviour:
   m_DefaultShakeDuration: 0.2
   m_DefaultShakeStrength: 0.3
   m_DefaultShakeVibrato: 12
+  m_DefaultChromaticAberrationIntensity: 0.5
+  m_TargetChromaticAberrationIntensity: 1
+  m_ChromaticAberrationEaseIn: 0.1
+  m_ChromaticAberrationHold: 0.4
+  m_ChromaticAberrationEaseOut: 0.5
+  m_DefaultVignetteIntensity: 0.6
+  m_TargetVignetteIntensity: 1
+  m_DefaultVignetteSmoothness: 0.2
+  m_TargetVignetteSmoothness: 1
+  m_VignetteEaseIn: 0.1
+  m_VignetteHold: 0.4
+  m_VignetteEaseOut: 0.5
 --- !u!1 &217406805
 GameObject:
   m_ObjectHideFlags: 0
@@ -39352,7 +39364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 3.2600002
+      value: 3.392
       objectReference: {fileID: 0}
     - target: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -43114,7 +43126,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 3.2600002
+      value: 3.399
       objectReference: {fileID: 0}
     - target: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
