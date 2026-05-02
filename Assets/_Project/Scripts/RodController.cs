@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -41,23 +42,25 @@ public class RodController : MonoBehaviour
 
     /* Animation properties */
     [Header("Animation Properties")]
-    [SerializeField] private AnimationCurve m_ShootRotationCurve;
     [SerializeField, Min(0f)] private static float m_ShootRotationDuration = 0.2f;
+    [SerializeField] private Ease m_ShootEase = Ease.OutQuad;
 
-    [SerializeField] private AnimationCurve m_StunRotationCurve; 
     [SerializeField, Min(0f)] private static float m_StunRotationDuration = 0.2f;
+    [SerializeField] private Ease m_StunEase = Ease.OutBounce;
     [SerializeField, Min(0f)] private static float m_StunDuration = 2f;
 
-    [SerializeField] private AnimationCurve m_DefenseStanceRotationCurve; 
     [SerializeField, Min(0f)] private static float m_DefenseStanceRotationDuration = 0.2f;
+    [SerializeField] private Ease m_DefenseStanceEase = Ease.OutQuad;
 
-    [SerializeField] private AnimationCurve m_AttackStanceRotationCurve; 
     [SerializeField, Min(0f)] private static float m_AttackStanceRotationDuration = 0.2f;
+    [SerializeField] private Ease m_AttackStanceEase = Ease.OutQuad;
 
-    /*Events*/
+    private Tween m_CurrentRotationTween;
+
+    /* Events */
     public static event Action<Vector2> OnShootEvent;
 
-    /*State*/
+    /* State */
     public enum ERodState
     {
         Idle,
@@ -263,6 +266,7 @@ public class RodController : MonoBehaviour
         Debug.Log("RodState changed to " + newRodState);
 
         ChangeSpritesForEachPlayer(newRodState);
+        m_CurrentRotationTween?.Kill();
         switch(m_CurrentRodState)
         {
             case ERodState.Idle:
@@ -286,27 +290,47 @@ public class RodController : MonoBehaviour
     private void OnEnterIdle()
     {
         ReleaseBall();
-        transform.localRotation = m_StartRotation;
+        m_CurrentRotationTween = transform
+            .DOLocalRotateQuaternion(m_StartRotation, 0.1f)
+            .SetEase(Ease.OutQuad)
+            .SetLink(gameObject);    
     }
 
     private void OnEnterDefenseStance()
     {
-        StartCoroutine(DefenseStateCoroutine());
+        m_CurrentRotationTween = RotateRodTo(m_RodDefenseStanceRotation, m_DefenseStanceRotationDuration, m_DefenseStanceEase);
     }
 
     private void OnEnterAttackStance()
     {
-        StartCoroutine(AttackStateCoroutine());
+        m_CurrentRotationTween = RotateRodTo(m_RodAttackStanceRotation, m_AttackStanceRotationDuration, m_AttackStanceEase);
     }
 
     private void OnEnterShooting()
     {
-        StartCoroutine(ShootingStateCoroutine());
-    }
+        ReleaseBall();
+        m_CurrentRotationTween = RotateRodTo(m_RodShootRotation, m_ShootRotationDuration, m_ShootEase)
+            .OnComplete(() => SetState(ERodState.Idle));    }
 
     private void OnEnterStunned()
     {
-        StartCoroutine(StunStateCoroutine());
+        Quaternion target = m_StartRotation * Quaternion.Euler(0, m_RodShootRotation, 0);
+
+        Sequence seq = DOTween.Sequence().SetLink(gameObject);
+        seq.Append(transform.DOLocalRotateQuaternion(target, m_StunRotationDuration).SetEase(m_StunEase));
+        seq.AppendInterval(Mathf.Max(0f, m_StunDuration - m_StunRotationDuration));
+        seq.OnComplete(() => SetState(ERodState.Idle));
+
+        m_CurrentRotationTween = seq;
+    }
+
+    private Tween RotateRodTo(float angle, float duration, Ease ease)
+    {
+        Quaternion target = m_StartRotation * Quaternion.Euler(0, angle, 0);
+        return transform
+            .DOLocalRotateQuaternion(target, duration)
+            .SetEase(ease)
+            .SetLink(gameObject);
     }
 
     private void ChangeSpritesForEachPlayer(ERodState state)
@@ -316,52 +340,6 @@ public class RodController : MonoBehaviour
             FootballPlayerController controller = player.GetComponent<FootballPlayerController>();
             controller.ChangeStateSprite(state);
         }
-    }
-#endregion
-
-#region Coroutines
-    IEnumerator StateAnimationCoroutine(AnimationCurve curve, float rotationDuration, float rotationAngle)
-    {
-        float elapsed = 0f;
-        Quaternion m_TargetRotation = m_StartRotation * Quaternion.Euler(0, rotationAngle, 0);
-
-        while(elapsed < rotationDuration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / rotationDuration;
-            float curveValue = curve.Evaluate(t);
-            transform.localRotation = Quaternion.Lerp(m_StartRotation, m_TargetRotation, curveValue);
-            yield return null;
-        }
-
-        transform.localRotation = m_TargetRotation;
-    }
-
-    private IEnumerator DefenseStateCoroutine()
-    {
-        yield return StartCoroutine(StateAnimationCoroutine(m_DefenseStanceRotationCurve, m_DefenseStanceRotationDuration, m_RodDefenseStanceRotation));
-    }
-
-    private IEnumerator AttackStateCoroutine()
-    {
-        yield return StartCoroutine(StateAnimationCoroutine(m_AttackStanceRotationCurve, m_AttackStanceRotationDuration, m_RodAttackStanceRotation));
-    }
-
-    private IEnumerator ShootingStateCoroutine()
-    {
-        ReleaseBall();
-        yield return StartCoroutine(StateAnimationCoroutine(m_ShootRotationCurve, m_ShootRotationDuration, m_RodShootRotation));
-        SetState(ERodState.Idle);
-    }
-
-    private IEnumerator StunStateCoroutine()
-    {
-        yield return StartCoroutine(StateAnimationCoroutine(m_StunRotationCurve, m_StunRotationDuration, m_RodShootRotation));
-
-        float waitTime = Mathf.Max(0f, m_StunDuration - m_StunRotationDuration);
-        yield return new WaitForSeconds(waitTime);
-
-        SetState(ERodState.Idle);
     }
 #endregion
 

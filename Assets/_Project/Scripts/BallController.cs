@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -20,6 +21,8 @@ public class BallController : MonoBehaviour
     private Vector3 m_AttachmentOffset = Vector3.zero;
     private bool m_IsAttached = false;
 
+    private Tween m_PendingShootTween;
+    
     /* Events */
     public static event Action<Vector3> OnBallImpact;   
 #region Unity Lifecycle
@@ -40,6 +43,7 @@ public class BallController : MonoBehaviour
     
     void OnDestroy()
     {
+        m_PendingShootTween?.Kill();
         RodController.OnShootEvent -= HandleShoot;
     }
     
@@ -131,27 +135,22 @@ public class BallController : MonoBehaviour
 #region Shoot
     void HandleShoot(Vector2 shootDirection)
     {
-        StartCoroutine(ShootCoroutine(shootDirection));
-    }
-#endregion
+        m_PendingShootTween?.Kill();
 
-#region Couroutines
-    IEnumerator ShootCoroutine(Vector2 shootDirection)
-    {
-        Debug.Log("Starting Shoot Coroutine with direction: " + shootDirection);
+        m_PendingShootTween = DOVirtual.DelayedCall(
+            RodController.GetShootAnimationDuration(),
+            () =>
+            {
+                Vector3 shootVector = new Vector3(
+                    shootDirection.x * m_ShootPower,
+                    0f,
+                    shootDirection.y * m_ShootPower
+                );
 
-        /* Wait for shoot animation to finish */
-        yield return new WaitForSeconds(RodController.GetShootAnimationDuration());
-
-        Vector3 shootVector = Vector3.zero;
-        
-        shootVector.x = shootDirection.x * m_ShootPower;
-        shootVector.z = shootDirection.y * m_ShootPower;
-        
-        m_Rigidbody.AddForce(shootVector);
-
-        /* Detach after the shooting animation is finished*/
-        DetachFromRod();
+                DetachFromRod();
+                m_Rigidbody.AddForce(shootVector);
+            }
+        ).SetLink(gameObject);
     }
 #endregion
 
