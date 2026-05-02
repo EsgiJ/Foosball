@@ -87,6 +87,8 @@ public class BallController : MonoBehaviour
         {
             GameManager.Instance.ScoreGoal(true);
         }
+
+        GameManager.Instance.PrepareForKickoff();
     }
 
     private void OnTriggerExit(Collider collision)

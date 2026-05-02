@@ -91,7 +91,7 @@ public class RodController : MonoBehaviour
 
         if (m_BallController == null)
         {
-            m_BallController = FindObjectsByType<BallController>(FindObjectsSortMode.None)[0];
+            m_BallController = FindObjectsByType<BallController>(FindObjectsSortMode.InstanceID)[0];
         }
 
         m_StartRotation = transform.localRotation;
