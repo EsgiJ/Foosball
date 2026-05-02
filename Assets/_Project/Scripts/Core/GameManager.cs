@@ -1,8 +1,8 @@
 using DG.Tweening;
-using JetBrains.Annotations;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Foosball
 {
@@ -22,10 +22,17 @@ namespace Foosball
         [SerializeField] private BallController m_BallController;
 
         [Header("Kickoff Propoerties")]
+        [SerializeField] private TextMeshPro m_CountdownText;
         [SerializeField] private float m_KickoffDuration = 3f; 
-        Tween m_KickoffTween;
+        [SerializeField] private float m_BallStartingNudge = 2f;
+        private Tween m_KickoffTween;
 
-    #region Unity Lifecycle
+        [Header("UI")]
+        [SerializeField] private TextMeshPro m_HomeTeamScoreUI;
+        [SerializeField] private TextMeshPro m_AwayTeamScoreUI;
+        [SerializeField] private TextMeshPro m_ScoreDashUI;
+
+        #region Unity Lifecycle
 
         public static GameManager Instance
         {
@@ -118,26 +125,117 @@ namespace Foosball
 
             UpdateScoreboard();
 
-            /* update the scoreboard with punch effect */
+            /* Update the scoreboard with punch effect */
             var scoreText = isHome ? m_HomeScoreText : m_AwayScoreText;
             scoreText.transform.DOKill();
             scoreText.transform.localScale = Vector3.one;
             scoreText.transform.DOPunchScale(Vector3.one * 0.5f, 0.4f, 8, 0.7f);
             Debug.Log($"[GameManager] {m_HomeTeam.teamName} {m_HomeTeam.score} - {m_AwayTeam.teamName} {m_AwayTeam.score}");
+
+            StartKickoffSequence();
         }
 
-        public void PrepareForKickoff()
+        public void StartKickoffSequence()
         {
-            Debug.Log("[GameManager] Preparing for kickoff...");
-            
+            m_KickoffTween?.Kill();
             if (m_BallController != null)
             {
-                m_BallController.transform.position = Vector3.zero;
-                m_BallController.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
-                m_BallController.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+                var rb = m_BallController.GetComponent<Rigidbody>();
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
             }
+
+            DisableInput();
+            // SetUpdate(true) to not get affected by the slow mo 
+            DG.Tweening.Sequence seq = DOTween.Sequence().SetUpdate(true);
+
+            seq.AppendCallback(() =>
+            {
+                m_HomeTeamScoreUI.gameObject.SetActive(true);
+                m_AwayTeamScoreUI.gameObject.SetActive(true);
+                m_ScoreDashUI.gameObject.SetActive(true);
+            });
+
+            seq.AppendCallback(() =>
+            {
+                if (m_BallController != null)
+                {
+                    m_BallController.transform.DOMove(Vector3.zero, 0.5f)
+                        .SetEase(Ease.InOutQuad)
+                        .SetUpdate(true);
+                }
+            });
+
+            int[] numbers = {3, 2, 1};
+
+            for(int i = 0; i < numbers.Length; i++)
+            {
+                int captured = i;
+                seq.AppendCallback(() => ShowCountdownNumber(numbers[captured].ToString()));
+                seq.AppendInterval(1f);
+            }
+            
+            seq.AppendCallback(() => ShowCountdownNumber("GO!", true));
+            seq.AppendInterval(0.4f);
+
+            seq.AppendCallback(() =>
+            {
+                m_HomeTeamScoreUI.gameObject.SetActive(false);
+                m_AwayTeamScoreUI.gameObject.SetActive(false);
+                m_ScoreDashUI.gameObject.SetActive(false);
+            });
+
+            seq.AppendCallback(() =>
+            {
+                if (m_CountdownText != null) m_CountdownText.gameObject.SetActive(false);
+
+                EnableInput();
+
+                if (m_BallController != null)
+                {
+                    Vector3 randomDir = new Vector3(
+                        Random.Range(-1f, 1f),
+                        0f,
+                        Random.Range(-1f, 1f)
+                    ).normalized;
+
+                    m_BallController.GetComponent<Rigidbody>().AddForce(
+                        randomDir * m_BallStartingNudge,
+                        ForceMode.Impulse
+                    );
+                }
+            });
+
+            m_KickoffTween = seq;
         }
 
+        private void ShowCountdownNumber(string countdownText, bool isFinal = false)
+        {
+            if(m_CountdownText  == null)
+                return;
+
+            m_CountdownText.gameObject.SetActive(true);
+            m_CountdownText.text = countdownText;
+
+            m_CountdownText.transform.DOKill();
+            m_CountdownText.transform.localScale = Vector3.one * 0.3f;
+            m_CountdownText.transform
+                .DOScale(isFinal ? 1.5f : 1f, 0.3f)
+                .SetEase(Ease.OutBack)
+                .SetUpdate(true);
+
+            var color = m_CountdownText.color;
+            color.a = 0f;
+            m_CountdownText.color = color;
+            m_CountdownText.DOFade(1f, 0.2f).SetUpdate(true);
+
+            if (isFinal)
+            {
+                m_CountdownText.transform
+                    .DOPunchRotation(new Vector3(0, 0, 10f), 0.4f, 8, 0.7f)
+                    .SetUpdate(true);
+            }
+        }
         private void ResetGame()
         {
             m_HomeTeam.ResetScore();
@@ -152,11 +250,26 @@ namespace Foosball
         {
             m_HomeScoreText.text = m_HomeTeam.score.ToString();
             m_AwayScoreText.text = m_AwayTeam.score.ToString();
+    
+            m_HomeTeamScoreUI.text = m_HomeTeam.score.ToString();
+            m_AwayTeamScoreUI.text = m_AwayTeam.score.ToString();
         }
 
-    #region Getters
+#region Input
+        private void EnableInput()
+        {
+            InputSystem.actions.FindActionMap("Game").Enable();
+        }
+
+        private void DisableInput()
+        {
+            InputSystem.actions.FindActionMap("Game").Disable();
+        }
+#endregion
+
+#region Getters
         public TeamController GetHomeTeam() => m_HomeTeam;
         public TeamController GetAwayTeam() => m_AwayTeam;
-    #endregion
-    }
+#endregion
+}
 }
