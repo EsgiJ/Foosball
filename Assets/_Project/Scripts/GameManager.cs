@@ -29,7 +29,6 @@ public class GameManager : MonoBehaviour
 
 #region Unity Lifecycle
 
-
     public static GameManager Instance
     {
         get
@@ -41,17 +40,19 @@ public class GameManager : MonoBehaviour
             return instance;
         }
     }
-     private static void SetupInstance()
+
+    private static void SetupInstance()
     {
         instance = FindObjectsByType<GameManager>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID)[0];
         if (instance == null)
         {
-            GameManager gameObj = new GameManager();
+            GameObject gameObj = new GameObject();
             gameObj.name = "GameManager";
             instance = gameObj.AddComponent<GameManager>();
             DontDestroyOnLoad(gameObj);
         }
     }
+
     void Awake()
     {
         if(instance == null)
@@ -64,6 +65,7 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     void Start()
     {
         InitializeTeams();
