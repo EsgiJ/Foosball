@@ -1,3 +1,4 @@
+using DG.Tweening;
 using JetBrains.Annotations;
 using TMPro;
 using Unity.VisualScripting;
@@ -97,8 +98,16 @@ public class GameManager : MonoBehaviour
             Debug.Log($"[GameManager] Away Team({m_AwayTeam.teamName}) scored!");
         }
 
+        GameJuiceManager.Instance?.PauseGame(0.1f);          
+        GameJuiceManager.Instance?.SlowMotion(0.3f, 0.6f);  
+        GameJuiceManager.Instance?.ShakeCamera(0.5f, 0.6f);
+        
         UpdateScoreboard();
 
+        var scoreText = isHome ? m_HomeScoreText : m_AwayScoreText;
+        scoreText.transform.DOKill();
+        scoreText.transform.localScale = Vector3.one;
+        scoreText.transform.DOPunchScale(Vector3.one * 0.5f, 0.4f, 8, 0.7f);
         Debug.Log($"[GameManager] {m_HomeTeam.teamName} {m_HomeTeam.score} - {m_AwayTeam.teamName} {m_AwayTeam.score}");
     }
 

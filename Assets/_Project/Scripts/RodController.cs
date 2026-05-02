@@ -309,8 +309,10 @@ public class RodController : MonoBehaviour
     private void OnEnterShooting()
     {
         ReleaseBall();
+        GameJuiceManager.Instance?.ShakeCamera(0.15f, 0.2f);
         m_CurrentRotationTween = RotateRodTo(m_RodShootRotation, m_ShootRotationDuration, m_ShootEase)
-            .OnComplete(() => SetState(ERodState.Idle));    }
+            .OnComplete(() => SetState(ERodState.Idle));
+    }
 
     private void OnEnterStunned()
     {
@@ -322,6 +324,9 @@ public class RodController : MonoBehaviour
         seq.OnComplete(() => SetState(ERodState.Idle));
 
         m_CurrentRotationTween = seq;
+
+        GameJuiceManager.Instance?.ShakeCamera(0.3f, 0.5f);
+        GameJuiceManager.Instance?.PauseGame(0.08f);
     }
 
     private Tween RotateRodTo(float angle, float duration, Ease ease)
