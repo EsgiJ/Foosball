@@ -1,4 +1,6 @@
+using JetBrains.Annotations;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /* TODO
@@ -15,7 +17,7 @@ using UnityEngine;
 */
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    private static GameManager instance;
 
     [Header("Teams")]
     [SerializeField] private TeamController m_HomeTeam;
@@ -24,12 +26,38 @@ public class GameManager : MonoBehaviour
     [Header("Scoreboard")]
     [SerializeField] private TextMeshPro m_HomeScoreText;
     [SerializeField] private TextMeshPro m_AwayScoreText;
+
 #region Unity Lifecycle
+
+
+    public static GameManager Instance
+    {
+        get
+        {
+            if(instance == null)
+            {
+                SetupInstance();
+            }
+            return instance;
+        }
+    }
+     private static void SetupInstance()
+    {
+        instance = FindObjectsByType<GameManager>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID)[0];
+        if (instance == null)
+        {
+            GameManager gameObj = new GameManager();
+            gameObj.name = "GameManager";
+            instance = gameObj.AddComponent<GameManager>();
+            DontDestroyOnLoad(gameObj);
+        }
+    }
     void Awake()
     {
-        if(Instance == null)
+        if(instance == null)
         {
-            Instance = this;
+            instance = this;
+            DontDestroyOnLoad(this.gameObject);
         }
         else
         {
