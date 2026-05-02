@@ -133,7 +133,7 @@ public class BallController : MonoBehaviour
 #endregion
 
 #region Shoot
-    void HandleShoot(Vector2 shootDirection)
+    private void HandleShoot(Vector2 shootDirection)
     {
         m_PendingShootTween?.Kill();
 
@@ -151,6 +151,11 @@ public class BallController : MonoBehaviour
                 m_Rigidbody.AddForce(shootVector);
             }
         ).SetLink(gameObject);
+    }
+
+    public void SimulateShoot(Vector2 shootDirection)
+    {
+        HandleShoot(shootDirection);
     }
 #endregion
 

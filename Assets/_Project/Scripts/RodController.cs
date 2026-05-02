@@ -8,7 +8,6 @@ using UnityEngine.InputSystem;
 public class RodController : MonoBehaviour
 {
 #region Properties 
-
     /* Rod General Properties */
     [Header("Rod Properties")]
     [SerializeField, Min(0f)] private float m_MovementSpeed = 5f;
@@ -70,6 +69,7 @@ public class RodController : MonoBehaviour
         Stunned
     }
 
+    /* Current Rod State Properties*/
     private ERodState m_CurrentRodState = ERodState.Idle;
     private bool m_IsStanceHeld = false;
     private bool m_HasBall = false;
@@ -103,6 +103,7 @@ public class RodController : MonoBehaviour
         {
             HandleMovement();
             HandleAim();
+            ShowAimTrajectory();
         }
     }
 
@@ -172,6 +173,7 @@ public class RodController : MonoBehaviour
         m_ShootAction.started -= OnShootPressed;
         m_StanceAction.started -= OnStancePressed;
         m_StanceAction.canceled -= OnStanceReleased;
+        AimTrajectory.Instance?.Hide();
     }
     }
 
@@ -390,6 +392,22 @@ public class RodController : MonoBehaviour
         }
     }
 
+    private void ShowAimTrajectory()
+    {
+        if (AimTrajectory.Instance == null) return;
+
+        if (!m_RodPossessed) return;
+
+        bool shouldShow = m_CurrentRodState == ERodState.AttackStance
+                    && m_HasBall
+                    && m_OwnedBall != null
+                    && m_AimVector.sqrMagnitude > 0.01f;
+
+        if (shouldShow)
+            AimTrajectory.Instance.SimulateTrajectory(m_OwnedBall.transform.position, m_AimVector);
+        else
+            AimTrajectory.Instance.Hide();
+    }
 #region Getters
     public ERodState GetState() => m_CurrentRodState;
     public static float GetShootAnimationDuration() => m_ShootRotationDuration;
