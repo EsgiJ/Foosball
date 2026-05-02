@@ -127,7 +127,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("[GameManager] Preparing for kickoff...");
         
-        KickoffTween
+        m_KickoffTween = DO
         if (m_BallController != null)
         {
             m_BallController.transform.position = Vector3.zero;

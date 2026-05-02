@@ -4,165 +4,166 @@ using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class BallController : MonoBehaviour
+namespace Foosball
 {
-    [UnitHeaderInspectable("Shoot Properties")]
-    [SerializeField] private AnimationCurve m_ShootAnimationCurve;
-    [SerializeField, Min(0f)] private float m_ShootPower = 1000f;
-    
-    [Header("Collision")]
-    [SerializeField] private float m_SphereRadius = 0.6f;
-
-    /* Physics */
-    private Rigidbody m_Rigidbody;
-    
-    /* Attachment */
-    private RodController m_AttachedRod = null;
-    private Vector3 m_AttachmentOffset = Vector3.zero;
-    private bool m_IsAttached = false;
-
-    private Tween m_PendingShootTween;
-    
-    /* Events */
-    public static event Action<Vector3> OnBallImpact;   
-#region Unity Lifecycle
-    void Start()
+    public class BallController : MonoBehaviour
     {
-        InitializePhysics();
+        [UnitHeaderInspectable("Shoot Properties")]
+        [SerializeField] private AnimationCurve m_ShootAnimationCurve;
+        [SerializeField, Min(0f)] private float m_ShootPower = 1000f;
+        
+        [Header("Collision")]
+        [SerializeField] private float m_SphereRadius = 0.6f;
 
-        RodController.OnShootEvent += HandleShoot;
-    }
+        /* Physics */
+        private Rigidbody m_Rigidbody;
+        
+        /* Attachment */
+        private RodController m_AttachedRod = null;
+        private Vector3 m_AttachmentOffset = Vector3.zero;
+        private bool m_IsAttached = false;
 
-    void Update()
-    {
-        if (m_IsAttached && m_AttachedRod != null)
+        private Tween m_PendingShootTween;
+         
+    #region Unity Lifecycle
+        void Start()
         {
-            UpdateAttachedMovement();
+            InitializePhysics();
+
+            GameEvents.OnShootEvent += HandleShoot;
         }
-    }
-    
-    void OnDestroy()
-    {
-        m_PendingShootTween?.Kill();
-        RodController.OnShootEvent -= HandleShoot;
-    }
-    
-#endregion
 
-#region Initialization
-    private void InitializePhysics()
-    {
-        m_Rigidbody = GetComponent<Rigidbody>();
-        if (m_Rigidbody == null)
+        void Update()
         {
-            m_Rigidbody = gameObject.AddComponent<Rigidbody>();
+            if (m_IsAttached && m_AttachedRod != null)
+            {
+                UpdateAttachedMovement();
+            }
         }
         
-        m_Rigidbody.isKinematic = false;  
-        m_Rigidbody.useGravity = true;
-        m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
-        
-        SphereCollider collider = GetComponent<SphereCollider>();
-        if (collider == null)
+        void OnDestroy()
         {
-            collider = gameObject.AddComponent<SphereCollider>();
+            m_PendingShootTween?.Kill();
+            GameEvents.OnShootEvent -= HandleShoot;
         }
         
-        collider.radius = m_SphereRadius;
-        collider.isTrigger = false;
-        
-        gameObject.tag = "Ball";
-    }
     #endregion
 
-#region Collider
-    private void OnTriggerEnter(Collider collision)
-    {
-        if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Home"))
+    #region Initialization
+        private void InitializePhysics()
         {
-            GameManager.Instance.ScoreGoal(false);
-        }
-
-        if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Away"))
-        {
-            GameManager.Instance.ScoreGoal(true);
-        }
-
-        GameManager.Instance.PrepareForKickoff();
-    }
-
-    private void OnTriggerExit(Collider collision)
-    {
-
-    }
-#endregion
-
-#region Movement
-    private void UpdateAttachedMovement()
-    {
-        Vector3 rodPos = m_AttachedRod.transform.position;
-        
-        Vector3 targetPos = rodPos + m_AttachmentOffset;
-        
-        transform.position = targetPos;
-    }
-#endregion
-
-#region Rod Attachment
-
-    public void AttachToRod(RodController rod)
-    {
-        m_AttachedRod = rod;
-        m_IsAttached = true;
-        
-        m_AttachmentOffset = transform.position - rod.transform.position;
-                
-        Debug.Log($"Ball attached to rod - offset: {m_AttachmentOffset}");
-    }
-
-    public void DetachFromRod()
-    {
-        if (m_IsAttached)
-        {
-            m_IsAttached = false;
-            m_AttachedRod = null;
-            m_AttachmentOffset = Vector3.zero;
-            
-            Debug.Log("Ball detached from rod");
-        }
-    }
-
-#endregion
-
-#region Shoot
-    private void HandleShoot(Vector2 shootDirection)
-    {
-        m_PendingShootTween?.Kill();
-
-        m_PendingShootTween = DOVirtual.DelayedCall(
-            RodController.GetShootAnimationDuration(),
-            () =>
+            m_Rigidbody = GetComponent<Rigidbody>();
+            if (m_Rigidbody == null)
             {
-                Vector3 shootVector = new Vector3(
-                    shootDirection.x * m_ShootPower,
-                    0f,
-                    shootDirection.y * m_ShootPower
-                );
-
-                DetachFromRod();
-                m_Rigidbody.AddForce(shootVector);
+                m_Rigidbody = gameObject.AddComponent<Rigidbody>();
             }
-        ).SetLink(gameObject);
-    }
+            
+            m_Rigidbody.isKinematic = false;  
+            m_Rigidbody.useGravity = true;
+            m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            
+            SphereCollider collider = GetComponent<SphereCollider>();
+            if (collider == null)
+            {
+                collider = gameObject.AddComponent<SphereCollider>();
+            }
+            
+            collider.radius = m_SphereRadius;
+            collider.isTrigger = false;
+            
+            gameObject.tag = "Ball";
+        }
+        #endregion
 
-    public void SimulateShoot(Vector2 shootDirection)
-    {
-        HandleShoot(shootDirection);
-    }
-#endregion
+    #region Collider
+        private void OnTriggerEnter(Collider collision)
+        {
+            if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Home"))
+            {
+                // false because away scored
+                GameEvents.RaiseGoalEvent(false);
+            }
 
-#region Getters
-    public bool IsAttachedToRod() => m_IsAttached;
-    public Vector3 GetLinearVelocity() => m_Rigidbody.linearVelocity;
-#endregion
+            if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Away"))
+            {
+                // true because home scored
+                GameEvents.RaiseGoalEvent(true);
+            }
+        }
+
+        private void OnTriggerExit(Collider collision)
+        {
+
+        }
+    #endregion
+
+    #region Movement
+        private void UpdateAttachedMovement()
+        {
+            Vector3 rodPos = m_AttachedRod.transform.position;
+            
+            Vector3 targetPos = rodPos + m_AttachmentOffset;
+            
+            transform.position = targetPos;
+        }
+    #endregion
+
+    #region Rod Attachment
+
+        public void AttachToRod(RodController rod)
+        {
+            m_AttachedRod = rod;
+            m_IsAttached = true;
+            
+            m_AttachmentOffset = transform.position - rod.transform.position;
+                    
+            Debug.Log($"Ball attached to rod - offset: {m_AttachmentOffset}");
+        }
+
+        public void DetachFromRod()
+        {
+            if (m_IsAttached)
+            {
+                m_IsAttached = false;
+                m_AttachedRod = null;
+                m_AttachmentOffset = Vector3.zero;
+                
+                Debug.Log("Ball detached from rod");
+            }
+        }
+
+    #endregion
+
+    #region Shoot
+        private void HandleShoot(Vector2 shootDirection)
+        {
+            m_PendingShootTween?.Kill();
+
+            m_PendingShootTween = DOVirtual.DelayedCall(
+                RodController.GetShootAnimationDuration(),
+                () =>
+                {
+                    Vector3 shootVector = new Vector3(
+                        shootDirection.x * m_ShootPower,
+                        0f,
+                        shootDirection.y * m_ShootPower
+                    );
+
+                    DetachFromRod();
+                    m_Rigidbody.AddForce(shootVector);
+                }
+            ).SetLink(gameObject);
+        }
+
+        public void SimulateShoot(Vector2 shootDirection)
+        {
+            HandleShoot(shootDirection);
+        }
+    #endregion
+
+    #region Getters
+        public bool IsAttachedToRod() => m_IsAttached;
+        public Vector3 GetLinearVelocity() => m_Rigidbody.linearVelocity;
+    #endregion
+    }
 }
