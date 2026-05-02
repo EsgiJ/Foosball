@@ -6,7 +6,8 @@ public class FootballPlayerController : MonoBehaviour
     [SerializeField] private float m_PlayerRadius = 1f;
     [SerializeField] private float m_PlayerHeight = 1.5f;
 
-    [SerializeField] private float m_BallVelocityThreshold = 10f;
+    [SerializeField] private float m_BallVelocityThreshold = 50f;
+    
     /* References */
     private RodController m_RodController;
     private Rigidbody m_Rigidbody;
