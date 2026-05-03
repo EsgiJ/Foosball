@@ -9,8 +9,7 @@ namespace Foosball
     public class BallController : MonoBehaviour
     {
         [UnitHeaderInspectable("Shoot Properties")]
-        [SerializeField] private AnimationCurve m_ShootAnimationCurve;
-        [SerializeField, Min(0f)] private float m_ShootPower = 1000f;
+        [SerializeField, Min(0f)] private float m_ShootPower = 10f;
         
         [Header("Collision")]
         [SerializeField] private float m_SphereRadius = 0.6f;

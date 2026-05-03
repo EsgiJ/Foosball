@@ -1127,7 +1127,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 557.6
+      value: 586
       objectReference: {fileID: 0}
     - target: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1732,7 +1732,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 88319523257384627, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_ShootPower
-      value: 1000
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 918775855270213279, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_Mass
@@ -38746,15 +38746,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Foosball.AudioManager
   m_PoolSize: 10
-  m_BallHitClip: {fileID: 0}
-  m_RodSwingClip: {fileID: 0}
-  m_StanceClickClip: {fileID: 0}
-  m_PossessSwitchClip: {fileID: 0}
-  m_GoalClip: {fileID: 0}
+  m_BallHitClip: {fileID: 8300000, guid: 9fcd5b9c2155e56488a364bed1cec583, type: 3}
+  m_RodSwingClip: {fileID: 8300000, guid: c0a6b356468e3054eab0c8b63fcef756, type: 3}
+  m_StanceClickClip: {fileID: 8300000, guid: 3becec1909f194046945d85ac1077772, type: 3}
+  m_PossessSwitchClip: {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
+  m_GoalClip: {fileID: 8300000, guid: 5bdb0e6fbabd4524486315597255b63e, type: 3}
   m_StunClip: {fileID: 0}
-  m_CountdownTickClip: {fileID: 0}
-  m_CountdownGoClip: {fileID: 0}
-  m_CrowdAmbientClip: {fileID: 0}
+  m_CountdownTickClip: {fileID: 8300000, guid: 19f89c6e740e7447f9e12a8310d3e973, type: 3}
+  m_CountdownGoClip: {fileID: 8300000, guid: 8c164fd81eeafa54b8cbd889d0ab5bc9, type: 3}
+  m_CrowdAmbientClip: {fileID: 8300000, guid: 2080fc2c9ec506146b353cd12d331954, type: 3}
   m_MusicSource: {fileID: 0}
 --- !u!1001 &1080665338
 PrefabInstance:
@@ -41607,7 +41607,7 @@ MonoBehaviour:
   m_GhostBallPrefab: {fileID: 5335341342303308354, guid: fff876a83c409f1448c27ba45a46effc, type: 3}
   m_LineRenderer: {fileID: 1782201577}
   m_MaxPhysicsFrameIterations: 100
-  m_ShootPower: 1000
+  m_ShootPower: 10
   m_UpdateInterval: 0.05
   m_FadeDuration: 0.15
 --- !u!1001 &1790440889

@@ -24,7 +24,7 @@ namespace Foosball
         [Header("Trajectory Properties")]
         [SerializeField] private LineRenderer m_LineRenderer;
         [SerializeField] private int m_MaxPhysicsFrameIterations = 100;
-        [SerializeField] private float m_ShootPower = 1000f;
+        [SerializeField] private float m_ShootPower = 10f;
         [SerializeField] private float m_UpdateInterval = 0.05f;
 
         [Header("Visual")]
