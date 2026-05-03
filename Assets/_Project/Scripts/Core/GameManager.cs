@@ -25,6 +25,8 @@ namespace Foosball
         [SerializeField] private TextMeshPro m_CountdownText;
         [SerializeField] private float m_KickoffDuration = 3f; 
         [SerializeField] private float m_BallStartingNudge = 2f;
+        private Vector3 m_CountdownOriginalScale;
+
         private Tween m_KickoffTween;
 
         [Header("UI")]
@@ -76,6 +78,8 @@ namespace Foosball
             InitializeTeams();
             FindTheBall();
             SubscribeToEvents();
+            if (m_CountdownText != null)
+                m_CountdownOriginalScale = m_CountdownText.transform.localScale;
         }
 
         void Update()
@@ -139,13 +143,10 @@ namespace Foosball
         {
             m_KickoffTween?.Kill();
             if (m_BallController != null)
-            {
-                var rb = m_BallController.GetComponent<Rigidbody>();
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
-            }
+                m_BallController.ResetBall();
 
             DisableInput();
+            
             // SetUpdate(true) to not get affected by the slow mo 
             DG.Tweening.Sequence seq = DOTween.Sequence().SetUpdate(true);
 
@@ -218,9 +219,11 @@ namespace Foosball
             m_CountdownText.text = countdownText;
 
             m_CountdownText.transform.DOKill();
-            m_CountdownText.transform.localScale = Vector3.one * 0.3f;
+            m_CountdownText.transform.localScale = m_CountdownOriginalScale * 0.3f;
+            Vector3 targetScale = isFinal ? m_CountdownOriginalScale * 1.5f : m_CountdownOriginalScale;
+
             m_CountdownText.transform
-                .DOScale(isFinal ? 1.5f : 1f, 0.3f)
+                .DOScale(targetScale, 0.3f)
                 .SetEase(Ease.OutBack)
                 .SetUpdate(true);
 

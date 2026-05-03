@@ -141,7 +141,7 @@ namespace Foosball
             m_GhostBallRigidbody.angularVelocity = Vector3.zero;
 
             Vector3 shootVector = new Vector3(shootDirection.x, 0f, shootDirection.y) * m_ShootPower;
-            m_GhostBallRigidbody.AddForce(shootVector);
+            m_GhostBallRigidbody.AddForce(shootVector, ForceMode.Impulse);
 
             m_LineRenderer.positionCount = m_MaxPhysicsFrameIterations + 1;
             m_LineRenderer.SetPosition(0, startPos);

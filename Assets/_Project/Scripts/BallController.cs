@@ -132,6 +132,18 @@ namespace Foosball
             }
         }
 
+        public void ResetBall()
+        {
+            m_PendingShootTween?.Kill();
+
+            if (m_IsAttached)
+                DetachFromRod();
+
+            m_Rigidbody.linearVelocity = Vector3.zero;
+            m_Rigidbody.angularVelocity = Vector3.zero;
+            transform.position = Vector3.zero;
+        }
+
     #endregion
 
     #region Shoot
@@ -150,7 +162,7 @@ namespace Foosball
                     );
 
                     DetachFromRod();
-                    m_Rigidbody.AddForce(shootVector);
+                    m_Rigidbody.AddForce(shootVector, ForceMode.Impulse);
                 }
             ).SetLink(gameObject);
         }

@@ -57,7 +57,7 @@ namespace Foosball
                 return;
             }
             int direction = m_RodControllers[m_PossedRodIndex].GetAim().x >= 0 ? 1 : -1;
-            int nextRodIndex = (m_PossedRodIndex + direction) % m_RodControllers.Length;
+            int nextRodIndex = (m_PossedRodIndex + direction + m_RodControllers.Length) % m_RodControllers.Length;
             PossessRod(nextRodIndex);
         }
 
