@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,6 +18,10 @@ namespace Foosball
         /* Action properties*/
         [Header("Input Actions")]
         InputAction m_ChangeRodAction;
+        InputAction m_ShakeTableAction;
+
+        [SerializeField] private BallController m_BallController;
+        [SerializeField] private float m_BallStartingNudge = 0.5f;
 
     #endregion
     #region Unity Lifecycle
@@ -24,6 +29,7 @@ namespace Foosball
         {
             InitializeInput();
             m_ChangeRodAction.performed += ctx => SwitchRod();
+            m_ShakeTableAction.performed += ctx => ShakeTheTable();
         }
         void Start()
         {
@@ -46,9 +52,28 @@ namespace Foosball
         private void InitializeInput()
         {
             m_ChangeRodAction = InputSystem.actions.FindAction("ChangeRod");
+            m_ShakeTableAction = InputSystem.actions.FindAction("ShakeTable");
         }
     #endregion
 
+        private void ShakeTheTable()
+        {
+            GameJuiceManager.Instance?.ShakeCamera(0.5f, 0.5f);
+
+            if (m_BallController != null)
+            {
+                Vector3 randomDir = new Vector3(
+                    UnityEngine.Random.Range(-1f, 1f),
+                    0f,
+                    UnityEngine.Random.Range(-1f, 1f)
+                ).normalized;
+
+                m_BallController.GetComponent<Rigidbody>().AddForce(
+                    randomDir * m_BallStartingNudge,
+                    ForceMode.Impulse
+                );
+            }
+        }
         private void SwitchRod()
         {
             if(m_ChangeRodAction == null)

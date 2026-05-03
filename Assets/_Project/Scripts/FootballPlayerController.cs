@@ -93,6 +93,11 @@ namespace Foosball
                 }
                 else
                 {
+                    if(m_RodController.GetState() ==RodController.ERodState.DefenseStance)
+                    {
+                        ball.StopBall();
+                    }
+                    
                     m_IsTouchingBall = true;
                     
                     if (CanAttachBall(ball))

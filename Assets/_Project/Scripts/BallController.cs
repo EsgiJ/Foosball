@@ -145,6 +145,14 @@ namespace Foosball
             transform.position = Vector3.zero;
         }
 
+        public void StopBall()
+        {
+            m_PendingShootTween?.Kill();
+
+            m_Rigidbody.linearVelocity = Vector3.zero;
+            m_Rigidbody.angularVelocity = Vector3.zero;
+        }
+
     #endregion
 
     #region Shoot

@@ -1448,6 +1448,8 @@ MonoBehaviour:
   - {fileID: 1852388206}
   - {fileID: 1890271145}
   - {fileID: 2010428458}
+  m_BallController: {fileID: 686613025}
+  m_BallStartingNudge: 0.5
 --- !u!1001 &243863658
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -37340,6 +37342,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6120337f045741644becb4fd38048b97, type: 3}
+--- !u!114 &686613025 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 88319523257384627, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
+  m_PrefabInstance: {fileID: 272760241}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 459538806cd882b4bad913058131df4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BallController
 --- !u!1 &722156267
 GameObject:
   m_ObjectHideFlags: 0
@@ -43127,6 +43140,8 @@ MonoBehaviour:
   - {fileID: 2033690545}
   - {fileID: 621418582}
   - {fileID: 1319885432}
+  m_BallController: {fileID: 686613025}
+  m_BallStartingNudge: 0.5
 --- !u!224 &2059690791 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5580228749572005779, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
