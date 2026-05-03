@@ -23,7 +23,6 @@ namespace Foosball
 
         [Header("Kickoff Propoerties")]
         [SerializeField] private TextMeshPro m_CountdownText;
-        [SerializeField] private float m_KickoffDuration = 3f; 
         [SerializeField] private float m_BallStartingNudge = 2f;
         private Vector3 m_CountdownOriginalScale;
 
@@ -65,7 +64,6 @@ namespace Foosball
             if(instance == null)
             {
                 instance = this;
-                DontDestroyOnLoad(this.gameObject);
             }
             else
             {

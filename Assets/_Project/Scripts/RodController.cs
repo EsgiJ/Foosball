@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -55,8 +57,23 @@ namespace Foosball
 
         [SerializeField, Min(0f)] private static float m_AttackStanceRotationDuration = 0.2f;
         [SerializeField] private Ease m_AttackStanceEase = Ease.OutQuad;
-
         private Tween m_CurrentRotationTween;
+
+        /* Possess Wiggle properties */
+        [Header("Possess Wiggle Effect Properties")]
+        [SerializeField] private float m_WigglePunchAmount = 0.15f;
+        [SerializeField] private float m_WiggleDuration = 0.4f;
+        [SerializeField] private int m_WiggleVibrato = 8;
+        [SerializeField] private float m_WiggleElasticity = 0.5f;
+        private Tween m_WiggleTween;
+
+        [Header("Outline Highlight")]
+        [SerializeField] private Color m_OutlineColor = Color.yellow;
+        [SerializeField] private float m_OutlineWidth = 6f;
+        [SerializeField] private float m_OutlineFadeDuration = 0.2f;
+
+        private List<Outline> m_Outlines = new();
+        private Tween m_OutlineTween;
 
         /* State */
         public enum ERodState
@@ -87,7 +104,8 @@ namespace Foosball
         {
             InitializePhysics();
             SpawnFootballPlayers();
-
+            CollectOutlines();
+            
             if (m_BallController == null)
             {
                 m_BallController = FindObjectsByType<BallController>(FindObjectsSortMode.InstanceID)[0];
@@ -154,6 +172,22 @@ namespace Foosball
             float zOffset = (index + 1) * spacing - (m_RodUsableExtent / 2f);
             return transform.position + new Vector3(0f, 0f, zOffset);
         }
+
+        private void CollectOutlines()
+        {
+            m_Outlines.Clear();
+
+            var outlines = GetComponentsInChildren<Outline>(includeInactive: true);
+            outlines.Append(GetComponent<Outline>());
+
+            foreach (var o in outlines)
+            {
+                m_Outlines.Add(o);
+                o.OutlineColor = m_OutlineColor;
+                o.OutlineWidth = 0f;       
+                o.enabled = false;
+            }
+        }
     #endregion
 
     #region Input Handling
@@ -166,6 +200,9 @@ namespace Foosball
             m_ShootAction.started += OnShootPressed;
             m_StanceAction.started += OnStancePressed;
             m_StanceAction.canceled += OnStanceReleased;
+
+            PlayWiggleEffect();
+            ShowOutline();
         }
         else
         {
@@ -173,6 +210,8 @@ namespace Foosball
             m_StanceAction.started -= OnStancePressed;
             m_StanceAction.canceled -= OnStanceReleased;
             AimTrajectory.Instance?.Hide();
+
+            HideOutline();
         }
         }
 
@@ -407,6 +446,61 @@ namespace Foosball
             else
                 AimTrajectory.Instance.Hide();
         }
+
+        private void PlayWiggleEffect()
+        {
+            transform.DOKill(true);
+
+            Sequence seq = DOTween.Sequence().SetLink(gameObject);
+            
+            seq.Join(transform.DOPunchPosition(
+                new Vector3(0f, 0f, m_WigglePunchAmount),
+                m_WiggleDuration,
+                m_WiggleVibrato,
+                m_WiggleElasticity
+            ));
+
+            m_WiggleTween = seq;
+        }
+
+        private void ShowOutline()
+        {
+            m_OutlineTween?.Kill();
+
+            foreach (var o in m_Outlines)
+            {
+                if (o != null) o.enabled = true;
+            }
+
+            m_OutlineTween = DOVirtual.Float(0f, m_OutlineWidth, m_OutlineFadeDuration,
+                v =>
+                {
+                    foreach (var o in m_Outlines)
+                        if (o != null) o.OutlineWidth = v;
+                })
+                .SetEase(Ease.OutBack)
+                .SetLink(gameObject);
+        }
+
+        private void HideOutline()
+        {
+            m_OutlineTween?.Kill();
+
+            m_OutlineTween = DOVirtual.Float(m_OutlineWidth, 0f, m_OutlineFadeDuration,
+                v =>
+                {
+                    foreach (var o in m_Outlines)
+                        if (o != null) o.OutlineWidth = v;
+                })
+                .SetEase(Ease.InQuad)
+                .OnComplete(() =>
+                {
+                    foreach (var o in m_Outlines)
+                        if (o != null) o.enabled = false;
+                })
+                .SetLink(gameObject);
+        }
+
     #region Getters
         public ERodState GetState() => m_CurrentRodState;
         public static float GetShootAnimationDuration() => m_ShootRotationDuration;

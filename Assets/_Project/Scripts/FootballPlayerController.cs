@@ -8,7 +8,7 @@ namespace Foosball
         [SerializeField] private float m_PlayerRadius = 1f;
         [SerializeField] private float m_PlayerHeight = 1.5f;
 
-        [SerializeField] private float m_BallVelocityThreshold = 50f;
+        [SerializeField] private float m_BallVelocityThreshold = 100f;
 
         /* References */
         private RodController m_RodController;

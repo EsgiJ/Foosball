@@ -376,7 +376,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 366144900608470010, guid: a6779dad1928c38418af42488f5a36bf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 12.862386
+      value: 13.109739
       objectReference: {fileID: 0}
     - target: {fileID: 366144900608470010, guid: a6779dad1928c38418af42488f5a36bf, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1160,10 +1160,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7287796430627075394, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
 --- !u!224 &170752928 stripped
 RectTransform:
@@ -38591,10 +38588,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7287796430627075394, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
 --- !u!1 &1011771207
 GameObject:
@@ -39081,10 +39075,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7287796430627075394, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
 --- !u!224 &1122525700 stripped
 RectTransform:
@@ -40570,10 +40561,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7287796430627075394, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c05c4181f16a82946b1c653407b7651c, type: 3}
 --- !u!1001 &1426579929
 PrefabInstance:
@@ -40845,7 +40833,6 @@ MonoBehaviour:
   m_AwayScoreText: {fileID: 1309026502}
   m_BallController: {fileID: 0}
   m_CountdownText: {fileID: 170752929}
-  m_KickoffDuration: 3
   m_BallStartingNudge: 2
   m_HomeTeamScoreUI: {fileID: 2059690792}
   m_AwayTeamScoreUI: {fileID: 1969948715}
@@ -43765,7 +43752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 366144900608470010, guid: a6779dad1928c38418af42488f5a36bf, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -11.872972
+      value: -12.120325
       objectReference: {fileID: 0}
     - target: {fileID: 366144900608470010, guid: a6779dad1928c38418af42488f5a36bf, type: 3}
       propertyPath: m_LocalPosition.y
