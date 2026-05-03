@@ -122,7 +122,7 @@ namespace Foosball
 
         public void PlayGoal()
         {
-            PlayOneShot(m_GoalClip, 1f, 1f, 1f);
+            PlayOneShot(m_GoalClip, 0.5f, 0.95f, 1.05f);
 
             if (m_MusicSource != null)
             {

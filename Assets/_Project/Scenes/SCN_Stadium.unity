@@ -41607,7 +41607,7 @@ MonoBehaviour:
   m_GhostBallPrefab: {fileID: 5335341342303308354, guid: fff876a83c409f1448c27ba45a46effc, type: 3}
   m_LineRenderer: {fileID: 1782201577}
   m_MaxPhysicsFrameIterations: 100
-  m_ShootPower: 10
+  m_ShootPower: 100
   m_UpdateInterval: 0.05
   m_FadeDuration: 0.15
 --- !u!1001 &1790440889
