@@ -82,12 +82,14 @@ namespace Foosball
             {
                 // false because away scored
                 GameEvents.RaiseGoalEvent(false);
+                AudioManager.Instance?.PlayGoal();
             }
 
             if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Away"))
             {
                 // true because home scored
                 GameEvents.RaiseGoalEvent(true);
+                AudioManager.Instance?.PlayGoal();
             }
         }
 

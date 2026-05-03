@@ -105,7 +105,7 @@ namespace Foosball
             InitializePhysics();
             SpawnFootballPlayers();
             CollectOutlines();
-            
+
             if (m_BallController == null)
             {
                 m_BallController = FindObjectsByType<BallController>(FindObjectsSortMode.InstanceID)[0];
@@ -201,6 +201,7 @@ namespace Foosball
             m_StanceAction.started += OnStancePressed;
             m_StanceAction.canceled += OnStanceReleased;
 
+            AudioManager.Instance?.PlayPossessSwitch();
             PlayWiggleEffect();
             ShowOutline();
         }
@@ -261,6 +262,7 @@ namespace Foosball
 
             SetState(ERodState.Shooting);
             GameEvents.RaiseShootEvent(m_AimVector);
+            AudioManager.Instance?.PlayShoot();
 
             m_HasBall = false;
         }
@@ -301,7 +303,7 @@ namespace Foosball
         {
             if(m_CurrentRodState == newRodState)
             return;
-
+            
             m_CurrentRodState = newRodState;
             Debug.Log("RodState changed to " + newRodState);
 
@@ -338,11 +340,13 @@ namespace Foosball
 
         private void OnEnterDefenseStance()
         {
+            AudioManager.Instance?.PlayStanceClick();
             m_CurrentRotationTween = RotateRodTo(m_RodDefenseStanceRotation, m_DefenseStanceRotationDuration, m_DefenseStanceEase);
         }
 
         private void OnEnterAttackStance()
         {
+            AudioManager.Instance?.PlayStanceClick();
             m_CurrentRotationTween = RotateRodTo(m_RodAttackStanceRotation, m_AttackStanceRotationDuration, m_AttackStanceEase);
         }
 
@@ -356,6 +360,8 @@ namespace Foosball
 
         private void OnEnterStunned()
         {
+            AudioManager.Instance?.PlayStun();
+
             Quaternion target = m_StartRotation * Quaternion.Euler(0, m_RodShootRotation, 0);
 
             Sequence seq = DOTween.Sequence().SetLink(gameObject);

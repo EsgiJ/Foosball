@@ -33,7 +33,7 @@ namespace Foosball
         [SerializeField] private TextMeshPro m_AwayTeamScoreUI;
         [SerializeField] private TextMeshPro m_ScoreDashUI;
 
-        #region Unity Lifecycle
+    #region Unity Lifecycle
 
         public static GameManager Instance
         {
@@ -171,10 +171,13 @@ namespace Foosball
             {
                 int captured = i;
                 seq.AppendCallback(() => ShowCountdownNumber(numbers[captured].ToString()));
+                seq.JoinCallback(() => AudioManager.Instance?.PlayCountdownTick());
                 seq.AppendInterval(1f);
             }
             
             seq.AppendCallback(() => ShowCountdownNumber("GO!", true));
+            seq.JoinCallback(() => AudioManager.Instance?.PlayCountdownGo());
+
             seq.AppendInterval(0.4f);
 
             seq.AppendCallback(() =>
