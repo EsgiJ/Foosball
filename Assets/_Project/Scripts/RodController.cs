@@ -24,6 +24,9 @@ namespace Foosball
         [SerializeField] private float m_RodAttackStanceRotation = 30f;
         [SerializeField] private float m_RodShootRotation = -180f;
 
+        [Header("Visual")]
+        [SerializeField] private Transform m_VisualWrapper;
+
         private bool m_IsHomeTeam = true;
         private Quaternion m_StartRotation;
 
@@ -68,6 +71,14 @@ namespace Foosball
         [SerializeField] private int m_WiggleVibrato = 8;
         [SerializeField] private float m_WiggleElasticity = 0.5f;
         private Tween m_WiggleTween;
+
+        [Header("Defense Stance Struggle Effect")]
+        [SerializeField] private Vector3 m_StrugglePunchAngle = new Vector3(0f, 0f, 8f); 
+        [SerializeField] private float m_StruggleDuration = 0.5f;
+        [SerializeField] private int m_StruggleVibrato = 4;
+        [SerializeField] private float m_StruggleElasticity = 0.6f;
+
+        private Tween m_StruggleTween;
 
         [Header("Outline Highlight")]
         [SerializeField] private Color m_OutlineColor = Color.yellow;
@@ -158,11 +169,13 @@ namespace Foosball
 
         void SpawnFootballPlayers()
         {
-            for(int i = 0; i < m_FootballPlayerCount; i++)
+            Transform parent = m_VisualWrapper != null ? m_VisualWrapper : transform;
+
+            for (int i = 0; i < m_FootballPlayerCount; i++)
             {
                 Vector3 spawnPosition = CalculateFootballPlayerPosition(i);
                 GameObject player = Instantiate(footballPlayer, spawnPosition, footballPlayer.transform.rotation);
-                player.transform.SetParent(transform, true);
+                player.transform.SetParent(parent, true);
                 footballPlayers.Add(player);
                 player.GetComponent<FootballPlayerController>().SetRodController(this);
             }
@@ -405,8 +418,9 @@ namespace Foosball
 
             if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
             {
-                AttachBallToRod(ball, contactingPlayer);
+                PlayStruggleEffect(ball);
                 ball.StopBall();
+                AttachBallToRod(ball, contactingPlayer);
                 SetState(ERodState.AttackStance);
             }   
             else if (m_IsStanceHeld && m_CurrentRodState == ERodState.AttackStance)
@@ -459,31 +473,57 @@ namespace Foosball
 
         private void PlayWiggleEffect()
         {
+            if (m_VisualWrapper == null) return;
+
             m_WiggleTween?.Kill(true);
 
-            Quaternion baseRot = transform.localRotation;
-
+            Quaternion baseRot = Quaternion.identity;
             Quaternion punchTarget = baseRot * Quaternion.Euler(0, m_WigglePunchRotation, 0);
 
             Sequence seq = DOTween.Sequence().SetLink(gameObject);
 
-            seq.Join(transform.DOPunchPosition(
+            seq.Join(m_VisualWrapper.DOPunchPosition(
                 new Vector3(0f, 0f, m_WigglePunchAmount),
                 m_WiggleDuration,
                 m_WiggleVibrato,
                 m_WiggleElasticity
             ));
 
-            float halfDuration = m_WiggleDuration / 2f;
-            seq.Join(
-                DOTween.Sequence()
-                    .Append(transform.DOLocalRotateQuaternion(punchTarget, halfDuration).SetEase(Ease.OutBounce))
-                    .Append(transform.DOLocalRotateQuaternion(baseRot, halfDuration).SetEase(Ease.InBounce))
-            );
+            seq.Join(m_VisualWrapper.DOPunchRotation(
+                new Vector3(0, m_WigglePunchRotation, 0),
+                m_WiggleDuration,
+                m_WiggleVibrato,
+                m_WiggleElasticity
+            ));
 
             m_WiggleTween = seq;
         }
 
+        private void PlayStruggleEffect(BallController ball)
+        {
+            if (m_VisualWrapper == null) return;
+            
+            m_StruggleTween?.Kill();
+
+            Vector3 ballVelocity = ball.GetLinearVelocity();
+            if (Mathf.Abs(ballVelocity.x) < 0.1f) return;
+
+            float direction = Mathf.Sign(ballVelocity.x);
+            float intensity = Mathf.Clamp01(ballVelocity.magnitude / 30f);
+
+            Vector3 scaledPunch = m_StrugglePunchAngle * direction * intensity;
+
+            m_StruggleTween = m_VisualWrapper.DOPunchRotation(
+                scaledPunch,
+                m_StruggleDuration,
+                m_StruggleVibrato,
+                m_StruggleElasticity
+            ).SetLink(gameObject);
+
+            GameJuiceManager.Instance?.ShakeCamera(0.15f, intensity * 0.25f);
+            if (intensity > 0.6f)
+                GameJuiceManager.Instance?.PauseGame(0.1f);
+        }
         private void ShowOutline()
         {
             m_OutlineTween?.Kill();

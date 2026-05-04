@@ -9,8 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6052142203383363986}
-  - component: {fileID: 5537797314393105499}
-  - component: {fileID: 2160321445552465644}
   - component: {fileID: 5448326573206855935}
   - component: {fileID: 2034316170991476351}
   m_Layer: 0
@@ -32,24 +30,116 @@ Transform:
   m_LocalPosition: {x: 1, y: 1, z: 0}
   m_LocalScale: {x: 0.3, y: 12, z: 0.3}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1343903646074339444}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
---- !u!33 &5537797314393105499
+--- !u!114 &5448326573206855935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4956024986374279022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c007f2a1e95ad804d92dbf5560983984, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RodController
+  m_MovementSpeed: 5
+  m_MinZPos: -1.5
+  m_MaxZPos: 1.5
+  m_RodUsableExtent: 12
+  m_FootballPlayerCount: 3
+  m_RodDefenseStanceRotation: 0
+  m_RodAttackStanceRotation: 30
+  m_RodShootRotation: -180
+  m_VisualWrapper: {fileID: 1343903646074339444}
+  footballPlayer: {fileID: 2537440484156038194, guid: 1fc24ebf1fd7ad94ba784ffb96ee6911, type: 3}
+  m_BallController: {fileID: 0}
+  m_ShootEase: 6
+  m_StunEase: 30
+  m_DefenseStanceEase: 6
+  m_AttackStanceEase: 6
+  m_WigglePunchAmount: 0.15
+  m_WiggleDuration: 0.4
+  m_WigglePunchRotation: 10
+  m_WiggleVibrato: 8
+  m_WiggleElasticity: 0.5
+  m_StrugglePunchAngle: {x: 0, y: 0, z: 8}
+  m_StruggleDuration: 0.5
+  m_StruggleVibrato: 4
+  m_StruggleElasticity: 0.6
+  m_OutlineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  m_OutlineWidth: 6
+  m_OutlineFadeDuration: 0.2
+  m_RodPossessed: 0
+--- !u!114 &2034316170991476351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4956024986374279022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Outline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
+--- !u!1 &7694334512569214024
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1343903646074339444}
+  - component: {fileID: 100721754984227545}
+  - component: {fileID: 7612656726390944742}
+  m_Layer: 0
+  m_Name: VisualWrapper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1343903646074339444
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7694334512569214024}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6052142203383363986}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &100721754984227545
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4956024986374279022}
+  m_GameObject: {fileID: 7694334512569214024}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &2160321445552465644
+--- !u!23 &7612656726390944742
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4956024986374279022}
+  m_GameObject: {fileID: 7694334512569214024}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -92,55 +182,3 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &5448326573206855935
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4956024986374279022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c007f2a1e95ad804d92dbf5560983984, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RodController
-  m_MovementSpeed: 5
-  m_MinZPos: -1.5
-  m_MaxZPos: 1.5
-  m_RodUsableExtent: 12
-  m_FootballPlayerCount: 3
-  m_RodDefenseStanceRotation: 0
-  m_RodAttackStanceRotation: 30
-  m_RodShootRotation: -180
-  footballPlayer: {fileID: 2537440484156038194, guid: 1fc24ebf1fd7ad94ba784ffb96ee6911, type: 3}
-  m_BallController: {fileID: 0}
-  m_ShootEase: 6
-  m_StunEase: 30
-  m_DefenseStanceEase: 6
-  m_AttackStanceEase: 6
-  m_WigglePunchAmount: 0.15
-  m_WiggleDuration: 0.4
-  m_WiggleVibrato: 8
-  m_WiggleElasticity: 0.5
-  m_OutlineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  m_OutlineWidth: 6
-  m_OutlineFadeDuration: 0.2
-  m_RodPossessed: 0
---- !u!114 &2034316170991476351
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4956024986374279022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Outline
-  outlineMode: 0
-  outlineColor: {r: 1, g: 1, b: 1, a: 1}
-  outlineWidth: 2
-  precomputeOutline: 0
-  bakeKeys: []
-  bakeValues: []
