@@ -69,11 +69,12 @@ namespace Foosball
             {
                 Destroy(gameObject);
             }
+
+            InitializeTeams();
         }
 
         void Start()
         {
-            InitializeTeams();
             FindTheBall();
             SubscribeToEvents();
             if (m_CountdownText != null)
@@ -89,6 +90,8 @@ namespace Foosball
 #region Initialization
         private void InitializeTeams()
         {
+            m_HomeTeam.SetIsHomeTeam(true);
+            m_AwayTeam.SetIsHomeTeam(false);
             ResetGame(); 
             Debug.Log($"[GameManager] Game started: {m_HomeTeam.teamName} {m_AwayTeam.teamName}");
         }
@@ -275,5 +278,5 @@ namespace Foosball
         public TeamController GetHomeTeam() => m_HomeTeam;
         public TeamController GetAwayTeam() => m_AwayTeam;
 #endregion
-}
+    }
 }

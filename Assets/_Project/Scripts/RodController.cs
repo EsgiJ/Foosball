@@ -24,6 +24,7 @@ namespace Foosball
         [SerializeField] private float m_RodAttackStanceRotation = 30f;
         [SerializeField] private float m_RodShootRotation = -180f;
 
+        private bool m_IsHomeTeam = true;
         private Quaternion m_StartRotation;
 
         /* References */
@@ -63,6 +64,7 @@ namespace Foosball
         [Header("Possess Wiggle Effect Properties")]
         [SerializeField] private float m_WigglePunchAmount = 0.15f;
         [SerializeField] private float m_WiggleDuration = 0.4f;
+        [SerializeField] private float m_WigglePunchRotation = 10f;
         [SerializeField] private int m_WiggleVibrato = 8;
         [SerializeField] private float m_WiggleElasticity = 0.5f;
         private Tween m_WiggleTween;
@@ -347,7 +349,8 @@ namespace Foosball
         private void OnEnterAttackStance()
         {
             AudioManager.Instance?.PlayStanceClick();
-            m_CurrentRotationTween = RotateRodTo(m_RodAttackStanceRotation, m_AttackStanceRotationDuration, m_AttackStanceEase);
+            float rodRotationBasedOnTeam = m_RodAttackStanceRotation * (IsHomeTeam() ? 1 : -1);
+            m_CurrentRotationTween = RotateRodTo(rodRotationBasedOnTeam, m_AttackStanceRotationDuration, m_AttackStanceEase);
         }
 
         private void OnEnterShooting()
@@ -403,6 +406,7 @@ namespace Foosball
             if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
             {
                 AttachBallToRod(ball);
+                ball.StopBall();
             }
             else if (m_IsStanceHeld && m_CurrentRodState == ERodState.AttackStance)
             {
@@ -455,16 +459,27 @@ namespace Foosball
 
         private void PlayWiggleEffect()
         {
-            transform.DOKill(true);
+            m_WiggleTween?.Kill(true);
+
+            Quaternion baseRot = transform.localRotation;
+
+            Quaternion punchTarget = baseRot * Quaternion.Euler(0, m_WigglePunchRotation, 0);
 
             Sequence seq = DOTween.Sequence().SetLink(gameObject);
-            
+
             seq.Join(transform.DOPunchPosition(
                 new Vector3(0f, 0f, m_WigglePunchAmount),
                 m_WiggleDuration,
                 m_WiggleVibrato,
                 m_WiggleElasticity
             ));
+
+            float halfDuration = m_WiggleDuration / 2f;
+            seq.Join(
+                DOTween.Sequence()
+                    .Append(transform.DOLocalRotateQuaternion(punchTarget, halfDuration).SetEase(Ease.OutBounce))
+                    .Append(transform.DOLocalRotateQuaternion(baseRot, halfDuration).SetEase(Ease.InBounce))
+            );
 
             m_WiggleTween = seq;
         }
@@ -519,6 +534,9 @@ namespace Foosball
             }
             return m_AimAction.ReadValue<Vector2>();
         }
+
+        public bool IsHomeTeam() => m_IsHomeTeam;
+        public void SetIsHomeTeam(bool isHome) => m_IsHomeTeam = isHome;
     #endregion
     }    
 }

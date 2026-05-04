@@ -12,7 +12,7 @@ namespace Foosball
         public string teamName = "Default";
         public int score = 0;
         public RodController[] m_RodControllers;
-
+        private bool m_IsHomeTeam = true;
         private int m_PossedRodIndex = -1;
 
         /* Action properties*/
@@ -34,6 +34,7 @@ namespace Foosball
         void Start()
         {
             DisableAllRodControllers();
+            SetTeamForRodControllers();
             m_RodControllers[0].SetPossessed(true);   
             m_PossedRodIndex = 0; 
         }
@@ -100,11 +101,23 @@ namespace Foosball
                 rod.SetPossessed(false);
             }
         }
+
+        private void SetTeamForRodControllers()
+        {
+            foreach (var rod in m_RodControllers)
+            {
+                rod.SetIsHomeTeam(IsHomeTeam());
+            }
+        }
+
         public void IncrementScore()
         {
             score++;
         }
 
         public void ResetScore() => score = 0;
+
+        public bool IsHomeTeam() => m_IsHomeTeam;
+        public void SetIsHomeTeam(bool isHome) => m_IsHomeTeam = isHome;
     }
 }
