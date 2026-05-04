@@ -49,8 +49,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4d92f02d598d97438a8b30e0aa29a94, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FootballPlayerController
-  m_PlayerRadius: 1
-  m_PlayerHeight: 1.5
+  m_PlayerRadius: 0.5
+  m_PlayerHeight: 2
   m_BallVelocityThreshold: 5
   m_IdleSprite: {fileID: 0}
   m_StunnedSprite: {fileID: 21300000, guid: 03d87e6442e9a91458d776716c325d74, type: 3}
@@ -102,7 +102,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0
+  m_Radius: 1
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}

@@ -18,12 +18,15 @@ namespace Foosball
         private Rigidbody m_Rigidbody;
         
         /* Attachment */
+        [SerializeField] private float m_AttachmentDuration = 0.1f;
+        private Tween m_AttachToRodTween;
         private RodController m_AttachedRod = null;
+        private Transform m_AttachedPlayerTransform = null;
         private Vector3 m_AttachmentOffset = Vector3.zero;
         private bool m_IsAttached = false;
-
+        
         private Tween m_PendingShootTween;
-         
+
     #region Unity Lifecycle
         void Start()
         {
@@ -34,7 +37,7 @@ namespace Foosball
 
         void Update()
         {
-            if (m_IsAttached && m_AttachedRod != null)
+            if (m_IsAttached && m_AttachedPlayerTransform  != null)
             {
                 UpdateAttachedMovement();
             }
@@ -101,24 +104,38 @@ namespace Foosball
     #region Movement
         private void UpdateAttachedMovement()
         {
-            Vector3 rodPos = m_AttachedRod.transform.position;
-            
-            Vector3 targetPos = rodPos + m_AttachmentOffset;
-            
+            if (m_AttachedPlayerTransform == null) return;
+
+            Vector3 targetPos = m_AttachedPlayerTransform.position + m_AttachmentOffset;
+            targetPos.y = transform.position.y;
             transform.position = targetPos;
         }
     #endregion
 
     #region Rod Attachment
 
-        public void AttachToRod(RodController rod)
+        public void AttachToRod(RodController rod, Transform playerTransform)
         {
             m_AttachedRod = rod;
+            m_AttachedPlayerTransform = playerTransform;
             m_IsAttached = true;
-            
-            m_AttachmentOffset = transform.position - rod.transform.position;
-                    
-            Debug.Log($"Ball attached to rod - offset: {m_AttachmentOffset}");
+
+            m_AttachmentOffset = new Vector3(
+                rod.IsHomeTeam() ? 0.25f : -0.25f,
+                0f,
+                0f
+            );
+
+            Vector3 targetPosition = playerTransform.position + m_AttachmentOffset;
+            targetPosition.y = transform.position.y;
+
+            m_AttachToRodTween?.Kill();
+            m_AttachToRodTween = transform.DOMove(targetPosition, m_AttachmentDuration).SetLink(gameObject);
+
+            m_Rigidbody.linearVelocity = Vector3.zero;
+            m_Rigidbody.angularVelocity = Vector3.zero;
+
+            Debug.Log($"Ball attached to player {playerTransform.name}");
         }
 
         public void DetachFromRod()
@@ -127,8 +144,9 @@ namespace Foosball
             {
                 m_IsAttached = false;
                 m_AttachedRod = null;
+                m_AttachedPlayerTransform = null;
                 m_AttachmentOffset = Vector3.zero;
-                
+
                 Debug.Log("Ball detached from rod");
             }
         }

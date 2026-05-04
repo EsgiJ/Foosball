@@ -6,7 +6,7 @@ namespace Foosball
     {
         [Header("Player Setup")]
         [SerializeField] private float m_PlayerRadius = 1f;
-        [SerializeField] private float m_PlayerHeight = 1.5f;
+        [SerializeField] private float m_PlayerHeight = 2f;
 
         [SerializeField] private float m_BallVelocityThreshold = 100f;
 
@@ -97,7 +97,7 @@ namespace Foosball
                     
                     if (CanAttachBall(ball))
                     {
-                        m_RodController.HandleBallContact(ball);
+                        m_RodController.HandleBallContact(ball, transform);
                     }
                     
                     Debug.Log($"{gameObject.name} touched ball");
@@ -113,7 +113,7 @@ namespace Foosball
             
                 if (CanAttachBall(ball))
                 {
-                    m_RodController.HandleBallContact(ball);
+                    m_RodController.HandleBallContact(ball, transform);
                 }
             }
         }

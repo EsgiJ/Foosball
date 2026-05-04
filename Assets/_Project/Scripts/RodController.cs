@@ -398,19 +398,20 @@ namespace Foosball
     #endregion
 
     #region Event Handling
-        public void HandleBallContact(BallController ball)
+        public void HandleBallContact(BallController ball, Transform contactingPlayer)
         {
             m_OwnedBall = ball;
-            m_HasBall = true;   
+            m_HasBall = true;
 
             if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
             {
-                AttachBallToRod(ball);
+                AttachBallToRod(ball, contactingPlayer);
                 ball.StopBall();
-            }
+                SetState(ERodState.AttackStance);
+            }   
             else if (m_IsStanceHeld && m_CurrentRodState == ERodState.AttackStance)
             {
-                AttachBallToRod(ball);
+                AttachBallToRod(ball, contactingPlayer);
             }
         }
 
@@ -421,11 +422,10 @@ namespace Foosball
 
     #endregion
 
-        private void AttachBallToRod(BallController ball)
+        private void AttachBallToRod(BallController ball, Transform playerTransform)
         {
-            ball.AttachToRod(this);
-            
-            Debug.Log("Ball attached to rod");
+            ball.AttachToRod(this, playerTransform);
+            Debug.Log($"Ball attached to rod via {playerTransform.name}");
         }
 
         public void ReleaseBall()

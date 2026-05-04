@@ -23,7 +23,7 @@ namespace Foosball
 
         [Header("Kickoff Propoerties")]
         [SerializeField] private TextMeshPro m_CountdownText;
-        [SerializeField] private float m_BallStartingNudge = 2f;
+        [SerializeField] private float m_BallStartingNudge = 0.5f;
         private Vector3 m_CountdownOriginalScale;
 
         private Tween m_KickoffTween;

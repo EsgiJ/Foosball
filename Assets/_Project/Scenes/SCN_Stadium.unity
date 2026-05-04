@@ -40902,7 +40902,7 @@ MonoBehaviour:
   m_AwayScoreText: {fileID: 1309026502}
   m_BallController: {fileID: 0}
   m_CountdownText: {fileID: 170752929}
-  m_BallStartingNudge: 2
+  m_BallStartingNudge: 0.5
   m_HomeTeamScoreUI: {fileID: 2059690792}
   m_AwayTeamScoreUI: {fileID: 1969948715}
   m_ScoreDashUI: {fileID: 1122525701}
