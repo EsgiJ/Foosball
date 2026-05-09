@@ -1,8 +1,8 @@
-using System;
-using System.Collections;
 using DG.Tweening;
 using Unity.VisualScripting;
 using UnityEngine;
+
+using Foosball.Rod;
 
 namespace Foosball
 {
@@ -19,13 +19,15 @@ namespace Foosball
         
         /* Attachment */
         [SerializeField] private float m_AttachmentDuration = 0.1f;
+
         private Tween m_AttachToRodTween;
         private RodController m_AttachedRod = null;
         private Transform m_AttachedPlayerTransform = null;
         private Vector3 m_AttachmentOffset = Vector3.zero;
         private bool m_IsAttached = false;
-        
         private Tween m_PendingShootTween;
+
+        private float m_LastAttachedRodShootDuration = 0f;
 
     #region Unity Lifecycle
         void Start()
@@ -120,6 +122,8 @@ namespace Foosball
             m_AttachedPlayerTransform = playerTransform;
             m_IsAttached = true;
 
+            m_LastAttachedRodShootDuration = rod.GetShootAnimationDuration();
+            
             m_AttachmentOffset = new Vector3(
                 rod.IsHomeTeam() ? 0.25f : -0.25f,
                 0f,
@@ -179,7 +183,7 @@ namespace Foosball
             m_PendingShootTween?.Kill();
 
             m_PendingShootTween = DOVirtual.DelayedCall(
-                RodController.GetShootAnimationDuration(),
+                m_LastAttachedRodShootDuration,
                 () =>
                 {
                     Vector3 shootVector = new Vector3(

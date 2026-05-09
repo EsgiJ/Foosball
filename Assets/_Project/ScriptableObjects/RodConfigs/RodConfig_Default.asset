@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 605762c301005b949a69223edb0d20af, type: 3}
+  m_Name: RodConfig_Default
+  m_EditorClassIdentifier: Assembly-CSharp::Foosball.Rod.RodConfig
+  MovementSpeed: 5
+  MinZPos: -1.5
+  MaxZPos: 1.5
+  UsableExtent: 12
+  FootballPlayerCount: 3
+  DefenseRotation: 0
+  AttackRotation: 30
+  ShootRotation: -180
+  ShootDuration: 0.2
+  ShootEase: 6
+  DefenseStanceDuration: 0.2
+  DefenseStanceEase: 6
+  AttackStanceDuration: 0.2
+  AttackStanceEase: 6
+  StunRotationDuration: 0.2
+  StunEase: 30
+  StunDuration: 2
+  WigglePunchAmount: 0.15
+  WigglePunchRotation: 10
+  WiggleDuration: 0.4
+  WiggleVibrato: 8
+  WiggleElasticity: 0.5
+  StrugglePunchAngle: {x: 0, y: 0, z: 8}
+  StruggleDuration: 0.5
+  StruggleVibrato: 4
+  StruggleElasticity: 0.6
+  OutlineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  OutlineWidth: 6
+  OutlineFadeDuration: 0.2

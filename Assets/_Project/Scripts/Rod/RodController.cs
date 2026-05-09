@@ -7,22 +7,13 @@ using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Foosball
+namespace Foosball.Rod
 {
     public class RodController : MonoBehaviour
     {
     #region Properties 
         /* Rod General Properties */
-        [Header("Rod Properties")]
-        [SerializeField, Min(0f)] private float m_MovementSpeed = 5f;
-        [SerializeField] private float m_MinZPos = -3.0f;
-        [SerializeField] private float m_MaxZPos = 3.0f;
-        [SerializeField, Min(0f)] private float m_RodUsableExtent = 6f;
-        [SerializeField, Range(1, 5)] private int m_FootballPlayerCount = 3;
-
-        [SerializeField] private float m_RodDefenseStanceRotation = 0f;
-        [SerializeField] private float m_RodAttackStanceRotation = 30f;
-        [SerializeField] private float m_RodShootRotation = -180f;
+        [SerializeField] private RodConfig m_RodConfig;
 
         [Header("Visual")]
         [SerializeField] private Transform m_VisualWrapper;
@@ -33,60 +24,23 @@ namespace Foosball
         /* References */
         [Header("Ball Reference")]
         [SerializeField] private GameObject footballPlayer;
-        private List<GameObject> footballPlayers = new List<GameObject>();
         [SerializeField] private BallController m_BallController;
+
+        private List<GameObject> footballPlayers = new List<GameObject>();
         private BallController m_OwnedBall = null;
         private Rigidbody m_Rigidbody;
 
-        /* Action properties*/
-        [Header("Animation Properties")]
         InputAction m_ShootAction;
         InputAction m_MoveAction;
         InputAction m_AimAction ;
         InputAction m_StanceAction;
 
         private Vector2 m_AimVector = Vector2.zero;
-
-        /* Animation properties */
-        [Header("Animation Properties")]
-        [SerializeField, Min(0f)] private static float m_ShootRotationDuration = 0.2f;
-        [SerializeField] private Ease m_ShootEase = Ease.OutQuad;
-
-        [SerializeField, Min(0f)] private static float m_StunRotationDuration = 0.2f;
-        [SerializeField] private Ease m_StunEase = Ease.OutBounce;
-        [SerializeField, Min(0f)] private static float m_StunDuration = 2f;
-
-        [SerializeField, Min(0f)] private static float m_DefenseStanceRotationDuration = 0.2f;
-        [SerializeField] private Ease m_DefenseStanceEase = Ease.OutQuad;
-
-        [SerializeField, Min(0f)] private static float m_AttackStanceRotationDuration = 0.2f;
-        [SerializeField] private Ease m_AttackStanceEase = Ease.OutQuad;
         private Tween m_CurrentRotationTween;
-
-        /* Possess Wiggle properties */
-        [Header("Possess Wiggle Effect Properties")]
-        [SerializeField] private float m_WigglePunchAmount = 0.15f;
-        [SerializeField] private float m_WiggleDuration = 0.4f;
-        [SerializeField] private float m_WigglePunchRotation = 10f;
-        [SerializeField] private int m_WiggleVibrato = 8;
-        [SerializeField] private float m_WiggleElasticity = 0.5f;
         private Tween m_WiggleTween;
-
-        [Header("Defense Stance Struggle Effect")]
-        [SerializeField] private Vector3 m_StrugglePunchAngle = new Vector3(0f, 0f, 8f); 
-        [SerializeField] private float m_StruggleDuration = 0.5f;
-        [SerializeField] private int m_StruggleVibrato = 4;
-        [SerializeField] private float m_StruggleElasticity = 0.6f;
-
         private Tween m_StruggleTween;
-
-        [Header("Outline Highlight")]
-        [SerializeField] private Color m_OutlineColor = Color.yellow;
-        [SerializeField] private float m_OutlineWidth = 6f;
-        [SerializeField] private float m_OutlineFadeDuration = 0.2f;
-
-        private List<Outline> m_Outlines = new();
         private Tween m_OutlineTween;
+        private List<Outline> m_Outlines = new();
 
         /* State */
         public enum ERodState
@@ -171,7 +125,7 @@ namespace Foosball
         {
             Transform parent = m_VisualWrapper != null ? m_VisualWrapper : transform;
 
-            for (int i = 0; i < m_FootballPlayerCount; i++)
+            for (int i = 0; i < m_RodConfig.FootballPlayerCount; i++)
             {
                 Vector3 spawnPosition = CalculateFootballPlayerPosition(i);
                 GameObject player = Instantiate(footballPlayer, spawnPosition, footballPlayer.transform.rotation);
@@ -183,8 +137,8 @@ namespace Foosball
 
         Vector3 CalculateFootballPlayerPosition(int index)
         {
-            float spacing = m_RodUsableExtent / (m_FootballPlayerCount + 1);
-            float zOffset = (index + 1) * spacing - (m_RodUsableExtent / 2f);
+            float spacing = m_RodConfig.UsableExtent / (m_RodConfig.FootballPlayerCount + 1);
+            float zOffset = (index + 1) * spacing - (m_RodConfig.UsableExtent / 2f);
             return transform.position + new Vector3(0f, 0f, zOffset);
         }
 
@@ -198,7 +152,7 @@ namespace Foosball
             foreach (var o in outlines)
             {
                 m_Outlines.Add(o);
-                o.OutlineColor = m_OutlineColor;
+                o.OutlineColor = m_RodConfig.OutlineColor;
                 o.OutlineWidth = 0f;       
                 o.enabled = false;
             }
@@ -241,12 +195,12 @@ namespace Foosball
 
             Vector3 position = transform.localPosition;
 
-            if (position.z < m_MinZPos)
-                position.z = m_MinZPos;
-            else if (position.z > m_MaxZPos)
-                position.z = m_MaxZPos;
+            if (position.z < m_RodConfig.MinZPos)
+                position.z = m_RodConfig.MinZPos;
+            else if (position.z > m_RodConfig.MaxZPos)
+                position.z = m_RodConfig.MaxZPos;
             else
-                position.z += m_MoveAction.ReadValue<float>() * m_MovementSpeed * Time.deltaTime;
+                position.z += m_MoveAction.ReadValue<float>() * m_RodConfig.MovementSpeed * Time.deltaTime;
 
             transform.localPosition = position;
         }
@@ -356,21 +310,21 @@ namespace Foosball
         private void OnEnterDefenseStance()
         {
             AudioManager.Instance?.PlayStanceClick();
-            m_CurrentRotationTween = RotateRodTo(m_RodDefenseStanceRotation, m_DefenseStanceRotationDuration, m_DefenseStanceEase);
+            m_CurrentRotationTween = RotateRodTo(m_RodConfig.DefenseRotation, m_RodConfig.DefenseStanceDuration, m_RodConfig.DefenseStanceEase);
         }
 
         private void OnEnterAttackStance()
         {
             AudioManager.Instance?.PlayStanceClick();
-            float rodRotationBasedOnTeam = m_RodAttackStanceRotation * (IsHomeTeam() ? 1 : -1);
-            m_CurrentRotationTween = RotateRodTo(rodRotationBasedOnTeam, m_AttackStanceRotationDuration, m_AttackStanceEase);
+            float rodRotationBasedOnTeam = m_RodConfig.AttackRotation * (IsHomeTeam() ? 1 : -1);
+            m_CurrentRotationTween = RotateRodTo(rodRotationBasedOnTeam, m_RodConfig.AttackStanceDuration, m_RodConfig.AttackStanceEase);
         }
 
         private void OnEnterShooting()
         {
             ReleaseBall();
             GameJuiceManager.Instance?.ShakeCamera(0.15f, 0.2f);
-            m_CurrentRotationTween = RotateRodTo(m_RodShootRotation, m_ShootRotationDuration, m_ShootEase)
+            m_CurrentRotationTween = RotateRodTo(m_RodConfig.ShootRotation, m_RodConfig.ShootDuration, m_RodConfig.ShootEase)
                 .OnComplete(() => SetState(ERodState.Idle));
         }
 
@@ -378,11 +332,11 @@ namespace Foosball
         {
             AudioManager.Instance?.PlayStun();
 
-            Quaternion target = m_StartRotation * Quaternion.Euler(0, m_RodShootRotation, 0);
+            Quaternion target = m_StartRotation * Quaternion.Euler(0, m_RodConfig.ShootRotation, 0);
 
             Sequence seq = DOTween.Sequence().SetLink(gameObject);
-            seq.Append(transform.DOLocalRotateQuaternion(target, m_StunRotationDuration).SetEase(m_StunEase));
-            seq.AppendInterval(Mathf.Max(0f, m_StunDuration - m_StunRotationDuration));
+            seq.Append(transform.DOLocalRotateQuaternion(target, m_RodConfig.StunRotationDuration).SetEase(m_RodConfig.StunEase));
+            seq.AppendInterval(Mathf.Max(0f, m_RodConfig.StunDuration - m_RodConfig.StunRotationDuration));
             seq.OnComplete(() => SetState(ERodState.Idle));
 
             m_CurrentRotationTween = seq;
@@ -478,22 +432,22 @@ namespace Foosball
             m_WiggleTween?.Kill(true);
 
             Quaternion baseRot = Quaternion.identity;
-            Quaternion punchTarget = baseRot * Quaternion.Euler(0, m_WigglePunchRotation, 0);
+            Quaternion punchTarget = baseRot * Quaternion.Euler(0, m_RodConfig.WigglePunchRotation, 0);
 
             Sequence seq = DOTween.Sequence().SetLink(gameObject);
 
             seq.Join(m_VisualWrapper.DOPunchPosition(
-                new Vector3(0f, 0f, m_WigglePunchAmount),
-                m_WiggleDuration,
-                m_WiggleVibrato,
-                m_WiggleElasticity
+                new Vector3(0f, 0f, m_RodConfig.WigglePunchAmount),
+                m_RodConfig.WiggleDuration,
+                m_RodConfig.WiggleVibrato,
+                m_RodConfig.WiggleElasticity
             ));
 
             seq.Join(m_VisualWrapper.DOPunchRotation(
-                new Vector3(0, m_WigglePunchRotation, 0),
-                m_WiggleDuration,
-                m_WiggleVibrato,
-                m_WiggleElasticity
+                new Vector3(0, m_RodConfig.WigglePunchRotation, 0),
+                m_RodConfig.WiggleDuration,
+                m_RodConfig.WiggleVibrato,
+                m_RodConfig.WiggleElasticity
             ));
 
             m_WiggleTween = seq;
@@ -511,13 +465,13 @@ namespace Foosball
             float direction = Mathf.Sign(ballVelocity.x);
             float intensity = Mathf.Clamp01(ballVelocity.magnitude / 30f);
 
-            Vector3 scaledPunch = m_StrugglePunchAngle * direction * intensity;
+            Vector3 scaledPunch = m_RodConfig.StrugglePunchAngle * direction * intensity;
 
             m_StruggleTween = m_VisualWrapper.DOPunchRotation(
                 scaledPunch,
-                m_StruggleDuration,
-                m_StruggleVibrato,
-                m_StruggleElasticity
+                m_RodConfig.StruggleDuration,
+                m_RodConfig.StruggleVibrato,
+                m_RodConfig.StruggleElasticity
             ).SetLink(gameObject);
 
             GameJuiceManager.Instance?.ShakeCamera(0.15f, intensity * 0.25f);
@@ -533,7 +487,7 @@ namespace Foosball
                 if (o != null) o.enabled = true;
             }
 
-            m_OutlineTween = DOVirtual.Float(0f, m_OutlineWidth, m_OutlineFadeDuration,
+            m_OutlineTween = DOVirtual.Float(0f, m_RodConfig.OutlineWidth, m_RodConfig.OutlineFadeDuration,
                 v =>
                 {
                     foreach (var o in m_Outlines)
@@ -547,7 +501,7 @@ namespace Foosball
         {
             m_OutlineTween?.Kill();
 
-            m_OutlineTween = DOVirtual.Float(m_OutlineWidth, 0f, m_OutlineFadeDuration,
+            m_OutlineTween = DOVirtual.Float(m_RodConfig.OutlineWidth, 0f, m_RodConfig.OutlineFadeDuration,
                 v =>
                 {
                     foreach (var o in m_Outlines)
@@ -564,7 +518,7 @@ namespace Foosball
 
     #region Getters
         public ERodState GetState() => m_CurrentRodState;
-        public static float GetShootAnimationDuration() => m_ShootRotationDuration;
+        public float GetShootAnimationDuration() => m_RodConfig.ShootDuration;
         public Vector2 GetAim()
         {
             if(m_AimAction == null)

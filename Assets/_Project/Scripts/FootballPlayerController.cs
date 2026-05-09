@@ -1,4 +1,5 @@
 using UnityEngine;
+using Foosball.Rod;
 
 namespace Foosball
 {

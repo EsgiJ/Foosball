@@ -1,6 +1,7 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+
+using Foosball.Rod;
 
 namespace Foosball
 {

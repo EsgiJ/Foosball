@@ -46,33 +46,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c007f2a1e95ad804d92dbf5560983984, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RodController
-  m_MovementSpeed: 5
-  m_MinZPos: -1.5
-  m_MaxZPos: 1.5
-  m_RodUsableExtent: 12
-  m_FootballPlayerCount: 3
-  m_RodDefenseStanceRotation: 0
-  m_RodAttackStanceRotation: 30
-  m_RodShootRotation: -180
+  m_RodConfig: {fileID: 11400000, guid: 7ea3d05781299bb4282a1f1f2dee8668, type: 2}
   m_VisualWrapper: {fileID: 1343903646074339444}
   footballPlayer: {fileID: 2537440484156038194, guid: 1fc24ebf1fd7ad94ba784ffb96ee6911, type: 3}
   m_BallController: {fileID: 0}
-  m_ShootEase: 6
-  m_StunEase: 30
-  m_DefenseStanceEase: 6
-  m_AttackStanceEase: 6
-  m_WigglePunchAmount: 0.15
-  m_WiggleDuration: 0.4
-  m_WigglePunchRotation: 10
-  m_WiggleVibrato: 8
-  m_WiggleElasticity: 0.5
-  m_StrugglePunchAngle: {x: 0, y: 0, z: 8}
-  m_StruggleDuration: 0.5
-  m_StruggleVibrato: 4
-  m_StruggleElasticity: 0.6
-  m_OutlineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  m_OutlineWidth: 6
-  m_OutlineFadeDuration: 0.2
   m_RodPossessed: 0
 --- !u!114 &2034316170991476351
 MonoBehaviour:
