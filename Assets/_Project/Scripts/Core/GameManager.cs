@@ -22,6 +22,7 @@ namespace Foosball
         [SerializeField] private BallController m_BallController;
 
         [Header("Kickoff Propoerties")]
+        [SerializeField] private float m_GoalWaitDuration = 1f;
         [SerializeField] private TextMeshPro m_CountdownText;
         [SerializeField] private float m_BallStartingNudge = 0.5f;
         private Vector3 m_CountdownOriginalScale;
@@ -107,10 +108,17 @@ namespace Foosball
         private void SubscribeToEvents()
         {
             GameEvents.OnGoalEvent += HandleGoal;
+            GameStateManager.Instance.OnStateChanged += HandleStateChanged;
         }
 #endregion
         public void HandleGoal(bool isHome)
         {
+            if(GameStateManager.Instance.CurrentState != GameState.Playing)
+            {
+                Debug.LogWarning("[GameManager] Goal scored while not in Playing state, ignoring.");
+                return;
+            }
+
             if(isHome)
             {
                 m_HomeTeam.IncrementScore();
@@ -137,7 +145,8 @@ namespace Foosball
             scoreText.transform.DOPunchScale(Vector3.one * 0.5f, 0.4f, 8, 0.7f);
             Debug.Log($"[GameManager] {m_HomeTeam.teamName} {m_HomeTeam.score} - {m_AwayTeam.teamName} {m_AwayTeam.score}");
 
-            StartKickoffSequence();
+            GameStateManager.Instance.GoToGoal();
+            DOVirtual.DelayedCall(m_GoalWaitDuration,() => GameStateManager.Instance.StartCountdown()).SetUpdate(true);
         }
 
         public void StartKickoffSequence()
@@ -145,8 +154,6 @@ namespace Foosball
             m_KickoffTween?.Kill();
             if (m_BallController != null)
                 m_BallController.ResetBall();
-
-            DisableInput();
             
             // SetUpdate(true) to not get affected by the slow mo 
             DG.Tweening.Sequence seq = DOTween.Sequence().SetUpdate(true);
@@ -192,26 +199,60 @@ namespace Foosball
 
             seq.AppendCallback(() =>
             {
-                if (m_CountdownText != null) m_CountdownText.gameObject.SetActive(false);
-
-                EnableInput();
-
-                if (m_BallController != null)
+                if (m_CountdownText != null) 
                 {
-                    Vector3 randomDir = new Vector3(
-                        Random.Range(-1f, 1f),
-                        0f,
-                        Random.Range(-1f, 1f)
-                    ).normalized;
-
-                    m_BallController.GetComponent<Rigidbody>().AddForce(
-                        randomDir * m_BallStartingNudge,
-                        ForceMode.Impulse
-                    );
+                    m_CountdownText.gameObject.SetActive(false);
                 }
+                GameStateManager.Instance.StartPlaying();
             });
 
             m_KickoffTween = seq;
+        }
+
+        private void HandleStateChanged(GameState previous, GameState next)
+        {
+            switch (next)
+            {
+                case GameState.Countdown:
+                    DisableInput();
+                    BeginControl();
+                    GameJuiceManager.Instance?.RestoreVignette();   
+                    StartKickoffSequence();
+                    break;
+                case GameState.Playing:
+                    EnableInput();
+                    NudgeBall();
+                    break;
+                case GameState.Goal:
+                    DisableInput();
+                    break;
+                case GameState.Setup:
+                case GameState.MainMenu:
+                    DisableInput();
+                    EndControl();
+                    break;
+            }
+        }
+
+        private void BeginControl()
+        {
+            m_HomeTeam.BeginControl();
+            m_AwayTeam.BeginControl();
+        }
+
+        private void EndControl()
+        {
+            m_HomeTeam.EndControl();
+            m_AwayTeam.EndControl();
+        }
+
+        private void NudgeBall()
+        {
+            if (m_BallController == null) 
+                return;
+
+            Vector3 randomDir = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)).normalized;
+            m_BallController.GetComponent<Rigidbody>().AddForce(randomDir * m_BallStartingNudge, ForceMode.Impulse);
         }
 
         private void ShowCountdownNumber(string countdownText, bool isFinal = false)
@@ -263,15 +304,17 @@ namespace Foosball
         }
 
 #region Input
-        private void EnableInput()
-        {
-            InputSystem.actions.FindActionMap("Game").Enable();
-        }
+    private void EnableInput()
+    {
+        m_HomeTeam.EnableInput();
+        m_AwayTeam.EnableInput();
+    }
 
-        private void DisableInput()
-        {
-            InputSystem.actions.FindActionMap("Game").Disable();
-        }
+    private void DisableInput()
+    {
+        m_HomeTeam.DisableInput();
+        m_AwayTeam.DisableInput();
+    }
 #endregion
 
 #region Getters

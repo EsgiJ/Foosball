@@ -82,6 +82,8 @@ namespace Foosball
     #region Collider
         private void OnTriggerEnter(Collider collision)
         {
+            if (!GameStateManager.IsPlaying) 
+                return;
             if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Home"))
             {
                 // false because away scored

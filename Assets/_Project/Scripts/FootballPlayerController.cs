@@ -80,6 +80,8 @@ namespace Foosball
     #region Collider
         private void OnTriggerEnter(Collider collision)
         {
+            if (!GameStateManager.IsPlaying) 
+                return;
             if (collision.gameObject.CompareTag("Ball"))
             {
                 BallController ball = collision.gameObject.GetComponent<BallController>();
@@ -108,6 +110,8 @@ namespace Foosball
 
         private void OnTriggerStay(Collider collision)
         {
+            if (!GameStateManager.IsPlaying) 
+                return;
             if (collision.gameObject.CompareTag("Ball"))
             {
                 BallController ball = collision.gameObject.GetComponent<BallController>();

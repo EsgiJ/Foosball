@@ -16,6 +16,10 @@ namespace Foosball
         private bool m_IsHomeTeam = true;
         private int m_PossedRodIndex = -1;
 
+        [SerializeField] private int m_PlayerIndex = 0;   // Home = 0, Away = 1
+        private PlayerInput m_PlayerInput;
+        private InputActionAsset m_Actions;
+
         /* Action properties*/
         [Header("Input Actions")]
         InputAction m_ChangeRodAction;
@@ -28,16 +32,18 @@ namespace Foosball
     #region Unity Lifecycle
         void Awake()
         {
+            ResolveInputSource();
             InitializeInput();
             m_ChangeRodAction.performed += ctx => SwitchRod();
             m_ShakeTableAction.performed += ctx => ShakeTheTable();
         }
         void Start()
         {
-            DisableAllRodControllers();
+            InitializeRodInput();
             SetTeamForRodControllers();
-            m_RodControllers[0].SetPossessed(true);   
-            m_PossedRodIndex = 0; 
+            DisableAllRodControllers();
+            m_PossedRodIndex = -1;
+            DisableInput();
         }
 
         void Update()
@@ -51,11 +57,31 @@ namespace Foosball
     #endregion
 
     #region Initialization
-        private void InitializeInput()
+    private void InitializeRodInput()
+    {
+        foreach (var rod in m_RodControllers)
+            rod.InitializeInput(m_Actions);
+    }
+    private void ResolveInputSource()
+    {
+        PlayerToken token = PlayerRegistry.GetByIndex(m_PlayerIndex);
+        if (token != null)
         {
-            m_ChangeRodAction = InputSystem.actions.FindAction("ChangeRod");
-            m_ShakeTableAction = InputSystem.actions.FindAction("ShakeTable");
+            m_PlayerInput = token.PlayerInput;
+            m_Actions = m_PlayerInput.actions;
         }
+        else
+        {
+            Debug.LogWarning($"[TeamController] index {m_PlayerIndex} no token found, global input fallback");
+            m_Actions = InputSystem.actions;
+        }
+    }
+
+    private void InitializeInput()
+    {
+        m_ChangeRodAction  = m_Actions.FindAction("ChangeRod");
+        m_ShakeTableAction = m_Actions.FindAction("ShakeTable");
+    }
     #endregion
 
         private void ShakeTheTable()
@@ -76,8 +102,24 @@ namespace Foosball
                 );
             }
         }
+
+        public void BeginControl()
+        {
+            if (m_PossedRodIndex >= 0) 
+                return;          
+            m_RodControllers[0].SetPossessed(true);
+            m_PossedRodIndex = 0;
+        }
+
+        public void EndControl()
+        {
+            DisableAllRodControllers();
+            m_PossedRodIndex = -1;
+        }
         private void SwitchRod()
         {
+            if (m_PossedRodIndex < 0) 
+                return;
             if(m_ChangeRodAction == null)
             {
                 Debug.LogWarning("ChangeRod action not found!");
@@ -114,6 +156,30 @@ namespace Foosball
         public void IncrementScore()
         {
             score++;
+        }
+
+        public void EnableInput()
+        {
+            if (m_PlayerInput != null) 
+            {
+                m_PlayerInput.ActivateInput();
+            }
+            else
+            {
+                m_Actions?.FindActionMap("Game")?.Enable();
+            }
+        }
+
+        public void DisableInput()
+        {
+            if (m_PlayerInput != null) 
+            {
+                m_PlayerInput.DeactivateInput();
+            }
+            else
+            {
+                m_Actions?.FindActionMap("Game")?.Disable();
+            }
         }
 
         public void ResetScore() => score = 0;

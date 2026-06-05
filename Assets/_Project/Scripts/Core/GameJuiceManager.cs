@@ -61,7 +61,7 @@ public class GameJuiceManager : MonoBehaviour
 
     private static void SetupInstance()
     {
-        instance = FindObjectsByType<GameJuiceManager>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID)[0];
+        instance = GameObject.Find("GameJuiceManager")?.GetComponent<GameJuiceManager>();
         if (instance == null)
         {
             GameObject gameObj = new GameObject();
@@ -112,12 +112,12 @@ public class GameJuiceManager : MonoBehaviour
 
     public void ShakeCamera(float duration = -1f, float strength = -1f)
     {
-        if (m_CameraTransform == null) return;
+        if (m_CameraTransform == null) 
+            return;
         if (duration < 0f) duration = m_DefaultShakeDuration;
         if (strength < 0f) strength = m_DefaultShakeStrength;
 
         m_ShakeTween?.Kill(true); 
-        m_CameraTransform.localPosition = m_CameraBasePos;
 
         m_ShakeTween = m_CameraTransform
             .DOShakePosition(duration, strength, m_DefaultShakeVibrato, 90f, false, true)
@@ -213,5 +213,22 @@ public class GameJuiceManager : MonoBehaviour
 
         m_VignetteTween = seq;
     }
+
+    public void SetVignetteIntensity(float intensity, float duration = 0.3f)
+    {
+        var volumeObj = GameObject.Find("Global Volume");
+        if (volumeObj == null) 
+            return;
+        var profile = volumeObj.GetComponent<UnityEngine.Rendering.Volume>().profile;
+        if (!profile.TryGet(out UnityEngine.Rendering.Universal.Vignette vignette)) 
+            return;
+
+        m_VignetteTween?.Kill();
+        m_VignetteTween = DOTween.To(() => vignette.intensity.value,
+            x => vignette.intensity.value = x, intensity, duration)
+            .SetUpdate(true).SetLink(gameObject);
+    }
+
+    public void RestoreVignette(float duration = 0.3f) => SetVignetteIntensity(m_DefaultVignetteIntensity, duration);
 #endregion
 }

@@ -1,11 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
-using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using QuickOutline;
 
 namespace Foosball.Rod
 {
@@ -63,8 +61,7 @@ namespace Foosball.Rod
     #region Unity Lifecycle
         void Awake()
         {
-            // This was necessary to ensure that we initialize input before any team tries to possess the rod 
-            InitializeInput();
+
         }
 
         void Start()
@@ -101,12 +98,12 @@ namespace Foosball.Rod
 
     #region Initialization
 
-        private void InitializeInput()
+        public void InitializeInput(InputActionAsset actions)
         {
-            m_ShootAction = InputSystem.actions.FindAction("Shoot");
-            m_MoveAction = InputSystem.actions.FindAction("MoveRod");
-            m_AimAction = InputSystem.actions.FindAction("Aim");
-            m_StanceAction = InputSystem.actions.FindAction("Stance");
+            m_ShootAction  = actions.FindAction("Shoot");
+            m_MoveAction   = actions.FindAction("MoveRod");
+            m_AimAction    = actions.FindAction("Aim");
+            m_StanceAction = actions.FindAction("Stance");
         }
 
         private void InitializePhysics()
