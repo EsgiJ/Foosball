@@ -20,8 +20,8 @@ namespace Foosball
         [SerializeField] private float m_MenuTiltLerp = 5f;
 
         [Header("Game Tilt (topa göre)")]
-        [SerializeField] private float m_TiltAmount = 2.5f;    
-        [SerializeField] private float m_TiltPerUnit = 0.4f;
+        [SerializeField] private float m_TiltAmount = 4f;    
+        [SerializeField] private float m_TiltPerUnit = 1f;
         [SerializeField] private float m_TiltLerp = 4f;
 
         private Vector3 m_GamePosePosition;
@@ -43,6 +43,10 @@ namespace Foosball
                 Debug.LogError("[CameraController] camera not found."); 
                 enabled = false; 
                 return; 
+            }
+            if (m_Ball == null)   
+            {
+                m_Ball = FindFirstObjectByType<BallController>().gameObject.transform;
             }
 
             m_GamePosePosition = m_Camera.localPosition;
@@ -93,12 +97,11 @@ namespace Foosball
             if (m_Ball == null) 
                 return;
 
-            float tiltX = Mathf.Clamp(m_Ball.position.z * m_TiltPerUnit, -m_TiltAmount, m_TiltAmount);
-            float tiltZ = Mathf.Clamp(-m_Ball.position.x * m_TiltPerUnit, -m_TiltAmount, m_TiltAmount);
-            Quaternion target = m_GamePoseRotation * Quaternion.Euler(tiltX, 0f, tiltZ);
+            float tiltX = Mathf.Clamp(-m_Ball.position.z * m_TiltPerUnit, -m_TiltAmount, m_TiltAmount);
+            float tilty = Mathf.Clamp(m_Ball.position.x * m_TiltPerUnit, -m_TiltAmount, m_TiltAmount);
+            Quaternion target = m_GamePoseRotation * Quaternion.Euler(tiltX, tilty, 0f);
 
-            m_Camera.localRotation = Quaternion.Slerp(
-                m_Camera.localRotation, target, m_TiltLerp * Time.deltaTime);
+            m_Camera.localRotation = Quaternion.Slerp(m_Camera.localRotation, target, m_TiltLerp * Time.deltaTime);
         }
 
         private bool IsMenuState(GameState s) => s == GameState.MainMenu || s == GameState.Setup;
