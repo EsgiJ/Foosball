@@ -18,12 +18,18 @@ namespace Foosball
 
         [SerializeField] private int m_PlayerIndex = 0;   // Home = 0, Away = 1
         private PlayerInput m_PlayerInput;
-        private InputActionAsset m_Actions;
 
         /* Action properties*/
         [Header("Input Actions")]
         InputAction m_ChangeRodAction;
         InputAction m_ShakeTableAction;
+
+        [Header("Input")]
+        [SerializeField] private InputActionAsset m_BaseActions;          
+        [SerializeField] private string m_DefaultScheme = "KeyboardLeft"; // Home: KeyboardLeft, Away: KeyboardRight
+
+        private InputActionAsset m_Actions;
+        public string CurrentScheme { get; private set; }
 
         [SerializeField] private BallController m_BallController;
         [SerializeField] private float m_BallStartingNudge = 0.5f;
@@ -32,18 +38,77 @@ namespace Foosball
     #region Unity Lifecycle
         void Awake()
         {
-            ResolveInputSource();
-            InitializeInput();
-            m_ChangeRodAction.performed += ctx => SwitchRod();
-            m_ShakeTableAction.performed += ctx => ShakeTheTable();
+            AssignScheme(m_DefaultScheme);
+        }
+
+        public void AssignScheme(string schemeName)
+        {
+            UnsubscribeTeamActions();
+
+            InputActionAsset baseAsset = m_BaseActions != null ? m_BaseActions : InputSystem.actions;
+            if (m_Actions != null) 
+            { 
+                m_Actions.Disable(); 
+                Destroy(m_Actions); 
+            }
+
+            m_Actions = Instantiate(baseAsset);                
+
+            var scheme = m_Actions.FindControlScheme(schemeName);
+            if (scheme.HasValue)
+            {
+                m_Actions.bindingMask = InputBinding.MaskByGroup(scheme.Value.bindingGroup);
+            }
+            else
+            {
+                Debug.LogWarning($"[TeamController] '{schemeName}' no control scheme found");
+            }
+
+            CurrentScheme = schemeName;
+
+            m_ChangeRodAction  = m_Actions.FindAction("ChangeRod");
+            m_ShakeTableAction = m_Actions.FindAction("ShakeTable");
+            SubscribeTeamActions();
+
+            if (m_RodControllers != null)
+            {
+                foreach (var rod in m_RodControllers)
+                {
+                    if (rod != null) 
+                        rod.InitializeInput(m_Actions);
+                }
+            }
+
+            m_Actions.Disable();  
+        }
+
+        private void SubscribeTeamActions()
+        {
+            if (m_ChangeRodAction != null)  
+            {
+                m_ChangeRodAction.performed  += OnChangeRod;
+            }
+            if (m_ShakeTableAction != null) 
+            {
+                m_ShakeTableAction.performed += OnShakeTable;
+            }
+        }
+        private void UnsubscribeTeamActions()
+        {
+            if (m_ChangeRodAction != null)  
+            {
+                m_ChangeRodAction.performed  -= OnChangeRod;
+            }
+            if (m_ShakeTableAction != null) 
+            {
+                m_ShakeTableAction.performed -= OnShakeTable;
+            }
         }
         void Start()
         {
-            InitializeRodInput();
             SetTeamForRodControllers();
             DisableAllRodControllers();
             m_PossedRodIndex = -1;
-            DisableInput();
         }
 
         void Update()
@@ -54,34 +119,16 @@ namespace Foosball
                 return;
             }
         }
-    #endregion
 
-    #region Initialization
-    private void InitializeRodInput()
-    {
-        foreach (var rod in m_RodControllers)
-            rod.InitializeInput(m_Actions);
-    }
-    private void ResolveInputSource()
-    {
-        PlayerToken token = PlayerRegistry.GetByIndex(m_PlayerIndex);
-        if (token != null)
+        void OnDestroy()
         {
-            m_PlayerInput = token.PlayerInput;
-            m_Actions = m_PlayerInput.actions;
+            UnsubscribeTeamActions();
+            if (m_Actions != null) 
+            { 
+                m_Actions.Disable(); 
+                Destroy(m_Actions); 
+            }
         }
-        else
-        {
-            Debug.LogWarning($"[TeamController] index {m_PlayerIndex} no token found, global input fallback");
-            m_Actions = InputSystem.actions;
-        }
-    }
-
-    private void InitializeInput()
-    {
-        m_ChangeRodAction  = m_Actions.FindAction("ChangeRod");
-        m_ShakeTableAction = m_Actions.FindAction("ShakeTable");
-    }
     #endregion
 
         private void ShakeTheTable()
@@ -158,33 +205,29 @@ namespace Foosball
             score++;
         }
 
-        public void EnableInput()
+        public void ApplyFormation(int[] counts)
         {
-            if (m_PlayerInput != null) 
-            {
-                m_PlayerInput.ActivateInput();
-            }
-            else
-            {
-                m_Actions?.FindActionMap("Game")?.Enable();
-            }
-        }
+                Debug.Log($"[{teamName}] ApplyFormation: {string.Join(",", counts)} | rod count: {m_RodControllers.Length}");
 
-        public void DisableInput()
-        {
-            if (m_PlayerInput != null) 
+            for (int i = 0; i < m_RodControllers.Length && i < counts.Length; i++)
             {
-                m_PlayerInput.DeactivateInput();
-            }
-            else
-            {
-                m_Actions?.FindActionMap("Game")?.Disable();
+                if (m_RodControllers[i] != null)
+                {
+                    m_RodControllers[i].SetPlayerCount(counts[i]);
+                }
             }
         }
+        private void OnChangeRod(InputAction.CallbackContext ctx)  => SwitchRod();
+        private void OnShakeTable(InputAction.CallbackContext ctx) => ShakeTheTable();
+
+        public void EnableInput()  => m_Actions?.FindActionMap("Game")?.Enable();
+        public void DisableInput() => m_Actions?.FindActionMap("Game")?.Disable();
 
         public void ResetScore() => score = 0;
 
         public bool IsHomeTeam() => m_IsHomeTeam;
         public void SetIsHomeTeam(bool isHome) => m_IsHomeTeam = isHome;
+
+        public InputActionAsset Actions => m_Actions;
     }
 }

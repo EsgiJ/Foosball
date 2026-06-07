@@ -21,10 +21,10 @@ namespace Foosball.Rod
 
         /* References */
         [Header("Ball Reference")]
-        [SerializeField] private GameObject footballPlayer;
+        [SerializeField] private GameObject m_FootballPlayer;
         [SerializeField] private BallController m_BallController;
 
-        private List<GameObject> footballPlayers = new List<GameObject>();
+        private List<GameObject> m_FootballPlayers = new List<GameObject>();
         private BallController m_OwnedBall = null;
         private Rigidbody m_Rigidbody;
 
@@ -125,9 +125,9 @@ namespace Foosball.Rod
             for (int i = 0; i < m_RodConfig.FootballPlayerCount; i++)
             {
                 Vector3 spawnPosition = CalculateFootballPlayerPosition(i);
-                GameObject player = Instantiate(footballPlayer, spawnPosition, footballPlayer.transform.rotation);
+                GameObject player = Instantiate(m_FootballPlayer, spawnPosition, m_FootballPlayer.transform.rotation);
                 player.transform.SetParent(parent, true);
-                footballPlayers.Add(player);
+                m_FootballPlayers.Add(player);
                 player.GetComponent<FootballPlayerController>().SetRodController(this);
             }
         }
@@ -353,7 +353,7 @@ namespace Foosball.Rod
 
         private void ChangeSpritesForEachPlayer(ERodState state)
         {
-            foreach(GameObject player in footballPlayers)
+            foreach(GameObject player in m_FootballPlayers)
             {
                 FootballPlayerController controller = player.GetComponent<FootballPlayerController>();
                 controller.ChangeStateSprite(state);
@@ -513,6 +513,13 @@ namespace Foosball.Rod
                 .SetLink(gameObject);
         }
 
+        public void SetPlayerCount(int count)
+        {
+            m_RodConfig.FootballPlayerCount = Mathf.Clamp(count, 1, 5);
+            foreach (var p in m_FootballPlayers) if (p != null) Destroy(p);
+            m_FootballPlayers.Clear();
+            SpawnFootballPlayers();
+        }
     #region Getters
         public ERodState GetState() => m_CurrentRodState;
         public float GetShootAnimationDuration() => m_RodConfig.ShootDuration;

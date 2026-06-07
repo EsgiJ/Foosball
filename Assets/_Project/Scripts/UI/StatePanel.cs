@@ -33,7 +33,6 @@ namespace Foosball
         {
             if (m_Content != null)
             {
-                GameJuiceManager.Instance?.VignetteEffect();
                 m_Content.SetActive(m_VisibleInStates.Contains(current));
             }
         }

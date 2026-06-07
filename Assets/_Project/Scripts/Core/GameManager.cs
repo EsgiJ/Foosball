@@ -216,7 +216,6 @@ namespace Foosball
                 case GameState.Countdown:
                     DisableInput();
                     BeginControl();
-                    GameJuiceManager.Instance?.RestoreVignette();   
                     StartKickoffSequence();
                     break;
                 case GameState.Playing:
@@ -227,6 +226,9 @@ namespace Foosball
                     DisableInput();
                     break;
                 case GameState.Setup:
+                    GameJuiceManager.Instance?.VignetteEffect();
+                    EndControl();
+                    break;    
                 case GameState.MainMenu:
                     DisableInput();
                     EndControl();
