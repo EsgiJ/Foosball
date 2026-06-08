@@ -126,10 +126,13 @@ namespace Foosball.Rod
             {
                 Vector3 spawnPosition = CalculateFootballPlayerPosition(i);
                 GameObject player = Instantiate(m_FootballPlayer, spawnPosition, m_FootballPlayer.transform.rotation);
+
                 player.transform.SetParent(parent, true);
+
                 m_FootballPlayers.Add(player);
                 player.GetComponent<FootballPlayerController>().SetRodController(this);
             }
+            ApplyTeamColor();
         }
 
         Vector3 CalculateFootballPlayerPosition(int index)
@@ -519,6 +522,22 @@ namespace Foosball.Rod
             foreach (var p in m_FootballPlayers) if (p != null) Destroy(p);
             m_FootballPlayers.Clear();
             SpawnFootballPlayers();
+        }
+
+        private void ApplyTeamColor()
+        {
+            var renderers = GetComponentsInChildren<Renderer>(true);
+
+            Color teamColor = IsHomeTeam() ? Color.red : new Color(0.20f, 0.50f, 1.00f);;
+
+            foreach (var r in renderers)
+            {
+                if (r == null) 
+                    continue;
+
+                Material mat = r.material;
+                mat.color = teamColor;
+            }
         }
     #region Getters
         public ERodState GetState() => m_CurrentRodState;
