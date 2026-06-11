@@ -142,7 +142,6 @@ namespace Foosball
             if (team.Actions.FindAction("Shoot")?.WasPressedThisFrame() == true)
                 ToggleReady(side);
 
-            // Takas (ChangeRod)
             if (team.Actions.FindAction("ChangeRod")?.WasPressedThisFrame() == true)
                 SwapSides();
         }
@@ -152,6 +151,7 @@ namespace Foosball
             var p = GetPlayerOnSide(side);
             int count = m_Formations.Count;
             p.formationIndex = (p.formationIndex + dir + count) % count;
+            AudioManager.Instance?.PlayMenuButtonClick();
             RefreshSide(side);
         }
 
@@ -159,6 +159,7 @@ namespace Foosball
         {
             var p = GetPlayerOnSide(side);
             p.ready = !p.ready;
+            AudioManager.Instance?.PlayToggleReady();
             RefreshSide(side);
 
             if (m_Players[0].ready && m_Players[1].ready)
@@ -167,7 +168,9 @@ namespace Foosball
 
         private void SwapSides()
         {
-            foreach (var p in m_Players) p.side = 1 - p.side;
+            foreach (var p in m_Players) 
+                p.side = 1 - p.side;
+            AudioManager.Instance?.PlaySwapSides();
             ApplySchemesAndEnable();
             RefreshAll();
         }

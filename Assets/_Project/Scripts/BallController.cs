@@ -103,6 +103,19 @@ namespace Foosball
         {
 
         }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (!collision.gameObject.CompareTag("Wall") || !GameStateManager.IsPlaying) 
+                return;
+
+            float impact = collision.relativeVelocity.magnitude;
+            if (impact < 1f) 
+                return;                
+
+            float vol = Mathf.Clamp01(impact / 20f);  
+            AudioManager.Instance?.PlayWallBounce(vol);
+        }
     #endregion
 
     #region Movement

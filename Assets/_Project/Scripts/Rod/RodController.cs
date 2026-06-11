@@ -375,6 +375,7 @@ namespace Foosball.Rod
                 PlayStruggleEffect(ball);
                 ball.StopBall();
                 AttachBallToRod(ball, contactingPlayer);
+                AudioManager.Instance?.PlayDefenseCatch();
                 SetState(ERodState.AttackStance);
             }   
             else if (m_IsStanceHeld && m_CurrentRodState == ERodState.AttackStance)

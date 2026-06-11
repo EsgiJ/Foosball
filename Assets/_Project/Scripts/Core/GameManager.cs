@@ -80,6 +80,7 @@ namespace Foosball
             SubscribeToEvents();
             if (m_CountdownText != null)
                 m_CountdownOriginalScale = m_CountdownText.transform.localScale;
+            AudioManager.Instance?.PlayMenuMusic();
         }
 
         void Update()
@@ -216,6 +217,10 @@ namespace Foosball
                 case GameState.Countdown:
                     DisableInput();
                     BeginControl();
+                    if (previous == GameState.Setup)
+                    {
+                        AudioManager.Instance?.PlayGameplayMusic();
+                    }
                     StartKickoffSequence();
                     break;
                 case GameState.Playing:
@@ -226,12 +231,14 @@ namespace Foosball
                     DisableInput();
                     break;
                 case GameState.Setup:
-                    GameJuiceManager.Instance?.VignetteEffect();
                     EndControl();
+                    GameJuiceManager.Instance?.VignetteEffect();
+                    AudioManager.Instance?.PlayMenuMusic();
                     break;    
                 case GameState.MainMenu:
                     DisableInput();
                     EndControl();
+                    AudioManager.Instance?.PlayMenuMusic();
                     break;
             }
         }

@@ -65,7 +65,7 @@ namespace Foosball
             Punch();
             if (m_PlayClickSound) 
             {
-                AudioManager.Instance?.PlayStanceClick();
+                AudioManager.Instance?.PlayMenuButtonClick();
             }
         }
 
