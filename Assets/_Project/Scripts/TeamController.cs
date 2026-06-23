@@ -34,6 +34,8 @@ namespace Foosball
         [SerializeField] private BallController m_BallController;
         [SerializeField] private float m_BallStartingNudge = 0.5f;
 
+        private InputDevice m_AssignedDevice;
+        public Gamepad AssignedGamepad => m_AssignedDevice as Gamepad;
     #endregion
     #region Unity Lifecycle
         void Awake()
@@ -41,7 +43,7 @@ namespace Foosball
             AssignScheme(m_DefaultScheme);
         }
 
-        public void AssignScheme(string schemeName)
+        public void AssignScheme(string schemeName, InputDevice device = null)
         {
             UnsubscribeTeamActions();
 
@@ -59,11 +61,12 @@ namespace Foosball
             {
                 m_Actions.bindingMask = InputBinding.MaskByGroup(scheme.Value.bindingGroup);
             }
-            else
+            if (device != null)
             {
-                Debug.LogWarning($"[TeamController] '{schemeName}' no control scheme found");
+                m_Actions.devices = new InputDevice[] { device };                
             }
-
+            
+            m_AssignedDevice = device;
             CurrentScheme = schemeName;
 
             m_ChangeRodAction  = m_Actions.FindAction("ChangeRod");

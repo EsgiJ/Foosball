@@ -164,25 +164,25 @@ namespace Foosball.Rod
         {
             m_RodPossessed = possessed;
 
-        if (possessed)
-        {
-            m_ShootAction.started += OnShootPressed;
-            m_StanceAction.started += OnStancePressed;
-            m_StanceAction.canceled += OnStanceReleased;
+            if (possessed)
+            {
+                m_ShootAction.started += OnShootPressed;
+                m_StanceAction.started += OnStancePressed;
+                m_StanceAction.canceled += OnStanceReleased;
 
-            AudioManager.Instance?.PlayPossessSwitch();
-            PlayWiggleEffect();
-            ShowOutline();
-        }
-        else
-        {
-            m_ShootAction.started -= OnShootPressed;
-            m_StanceAction.started -= OnStancePressed;
-            m_StanceAction.canceled -= OnStanceReleased;
-            AimTrajectory.Instance?.Hide();
+                AudioManager.Instance?.PlayPossessSwitch();
+                PlayWiggleEffect();
+                ShowOutline();
+            }
+            else
+            {
+                m_ShootAction.started -= OnShootPressed;
+                m_StanceAction.started -= OnStancePressed;
+                m_StanceAction.canceled -= OnStanceReleased;
+                AimTrajectory.Instance?.Hide(this);
 
-            HideOutline();
-        }
+                HideOutline();
+            }
         }
 
         private void HandleMovement()
@@ -213,6 +213,7 @@ namespace Foosball.Rod
                 return;
             }
             m_AimVector = m_AimAction.ReadValue<Vector2>();
+            m_AimVector.x = IsHomeTeam() ? 1f : -1f;
         }
 
         private void OnShootPressed(InputAction.CallbackContext context)
@@ -411,19 +412,21 @@ namespace Foosball.Rod
 
         private void ShowAimTrajectory()
         {
-            if (AimTrajectory.Instance == null) return;
+            if (AimTrajectory.Instance == null || !m_RodPossessed) 
+                return;
 
-            if (!m_RodPossessed) return;
 
-            bool shouldShow = m_CurrentRodState == ERodState.AttackStance
-                        && m_HasBall
-                        && m_OwnedBall != null
-                        && m_AimVector.sqrMagnitude > 0.01f;
+            bool shouldShow = m_CurrentRodState == ERodState.AttackStance && m_HasBall && m_OwnedBall != null;
 
             if (shouldShow)
-                AimTrajectory.Instance.SimulateTrajectory(m_OwnedBall.transform.position, m_AimVector);
+            {
+                AimTrajectory.Instance.Show(this);
+                AimTrajectory.Instance.SimulateTrajectory(this, m_OwnedBall.transform.position, m_AimVector);
+            }
             else
-                AimTrajectory.Instance.Hide();
+            {
+                AimTrajectory.Instance.Hide(this);
+            }
         }
 
         private void PlayWiggleEffect()

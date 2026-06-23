@@ -9,9 +9,11 @@ namespace Foosball
     public class AimTrajectory : MonoBehaviour
     {
         private static AimTrajectory instance;
-
+        private object m_Owner;
+        
         [Header("Scene Propesties")]
         [SerializeField] private Transform m_FoosballTableObstaclesParent;
+        [SerializeField] private float m_SimulationTimeStep = 0.02f;
         private Scene m_SimulateScene;
         private PhysicsScene m_PhysicsScene;
 
@@ -29,6 +31,9 @@ namespace Foosball
 
         [Header("Visual")]
         [SerializeField] private float m_FadeDuration = 0.15f;
+        [SerializeField] private float m_EndAlphaScale = 0.3f;
+        private Color m_BaseStartColor;
+        private Color m_BaseEndColor;
 
         private float m_LastUpdateTime = -999f;
         private bool m_IsVisible = false;
@@ -79,6 +84,12 @@ namespace Foosball
             m_LineRenderer.positionCount = 0;
             m_LineRenderer.enabled = false;
             m_LineRenderer.textureMode = LineTextureMode.Tile;
+            m_LineRenderer.material = new Material(m_LineRenderer.material);
+
+            m_BaseStartColor = m_LineRenderer.startColor; 
+            m_BaseStartColor.a = 1f;
+            m_BaseEndColor = m_LineRenderer.endColor;   
+            m_BaseEndColor.a = 1f;
         }
 
     #endregion
@@ -104,7 +115,7 @@ namespace Foosball
             Debug.Log($"SpawnGhostBall called. Prefab: {m_GhostBallPrefab}");
             if (m_GhostBallPrefab == null)
             {
-                Debug.LogError("GhostBallPrefab atanmadı!");
+                Debug.LogError("GhostBallPrefab not assigned!");
                 return;
             }
 
@@ -114,6 +125,7 @@ namespace Foosball
             SceneManager.MoveGameObjectToScene(ghost, m_SimulateScene);
 
             m_GhostBallRigidbody = ghost.GetComponent<Rigidbody>();
+            m_GhostBallRigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             m_GhostBallTransform = ghost.transform;
 
             m_GhostBallRigidbody.linearVelocity = Vector3.zero;
@@ -121,18 +133,39 @@ namespace Foosball
             ghost.SetActive(false);
         }
 
-        public void SimulateTrajectory(Vector3 startPos, Vector2 shootDirection)
+        public void ResetTrajectory()
         {
-            if (shootDirection.sqrMagnitude < 0.01f)
-            {
-                Hide();
-                return;
-            }
+            m_FadeTween?.Kill();
+            m_IsVisible = false;
+            m_LastUpdateTime = -999f;
 
-            Show();
+            if (m_GhostBallRigidbody != null)
+            {
+                m_GhostBallRigidbody.linearVelocity = Vector3.zero;
+                m_GhostBallRigidbody.angularVelocity = Vector3.zero;
+            }
+            if (m_GhostBallTransform != null)
+                m_GhostBallTransform.gameObject.SetActive(false);
+
+            if (m_LineRenderer != null)
+            {
+                SetTrajectoryAlpha(0f);          
+                m_LineRenderer.positionCount = 0;
+                m_LineRenderer.enabled = false;
+            }
+        }
+
+        public void SimulateTrajectory(object owner, Vector3 startPos, Vector2 shootDirection)
+        {
+            if (!ReferenceEquals(m_Owner, owner)) 
+                return;
+            if (shootDirection.sqrMagnitude < 0.01f)
+                return;
 
             // to not update every frame
-            if (Time.time - m_LastUpdateTime < m_UpdateInterval) return;
+            if (Time.time - m_LastUpdateTime < m_UpdateInterval) 
+                return;
+
             m_LastUpdateTime = Time.time;
 
             m_GhostBallTransform.gameObject.SetActive(true);
@@ -148,7 +181,7 @@ namespace Foosball
 
             for(int i = 0; i < m_MaxPhysicsFrameIterations; i++)
             {
-                m_PhysicsScene.Simulate(Time.fixedDeltaTime);
+                m_PhysicsScene.Simulate(m_SimulationTimeStep);
                 m_LineRenderer.SetPosition(i + 1, m_GhostBallTransform.position);
             }
 
@@ -157,43 +190,38 @@ namespace Foosball
             m_GhostBallTransform.gameObject.SetActive(false);
         }
 
-        public void Show()
+        private void SetTrajectoryAlpha(float t)
         {
-            if (m_IsVisible) return;
-            m_IsVisible = true;
-            m_LineRenderer.enabled = true;
+            var s = m_BaseStartColor; 
+            s.a = t;                  
+            m_LineRenderer.startColor = s;
 
-            m_FadeTween?.Kill();
-            m_FadeTween = DOVirtual.Float(0f, 1f, m_FadeDuration,
-                v =>
-                {
-                    var c = m_LineRenderer.startColor; c.a = v;
-                    m_LineRenderer.startColor = c;
-                    var c2 = m_LineRenderer.endColor; c2.a = v * 0.3f;
-                    m_LineRenderer.endColor = c2;
-                }).SetLink(gameObject);
+            var e = m_BaseEndColor;   
+            e.a = t * m_EndAlphaScale;
+            m_LineRenderer.endColor = e;
         }
 
-        public void Hide()
+        public void Show(object owner)
         {
-            if (!m_IsVisible) return;
-            m_IsVisible = false;
+            m_Owner = owner;
+            m_IsVisible = true;
+            if (!m_LineRenderer.enabled) 
+                m_LineRenderer.enabled = true;
+                
+            SetTrajectoryAlpha(1f);
+        }
 
-            m_FadeTween?.Kill();
-            m_FadeTween = DOVirtual.Float(1f, 0f, m_FadeDuration,
-                v =>
-                {
-                    var c = m_LineRenderer.startColor; c.a = v;
-                    m_LineRenderer.startColor = c;
-                    var c2 = m_LineRenderer.endColor; c2.a = v * 0.3f;
-                    m_LineRenderer.endColor = c2;
-                })
-                .OnComplete(() =>
-                {
-                    m_LineRenderer.enabled = false;
-                    m_LineRenderer.positionCount = 0;
-                })
-                .SetLink(gameObject);
+        public void Hide(object owner)
+        {
+            if (m_Owner != null && !ReferenceEquals(m_Owner, owner)) 
+                return;
+            if (!m_IsVisible) 
+                return;
+            m_IsVisible = false;
+            m_Owner = null;
+            m_IsVisible = false;
+            m_LineRenderer.positionCount = 0;
+            m_LineRenderer.enabled = false;
         }
     }
 }

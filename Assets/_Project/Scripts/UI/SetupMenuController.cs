@@ -116,8 +116,10 @@ namespace Foosball
 
         private void ApplySchemesAndEnable()
         {
-            m_LeftTeam.AssignScheme(GetPlayerOnSide(0).Scheme);
-            m_RightTeam.AssignScheme(GetPlayerOnSide(1).Scheme);
+            var pl = GetPlayerOnSide(0);
+            var pr = GetPlayerOnSide(1);
+            m_LeftTeam.AssignScheme(pl.Scheme,  pl.useGamepad ? pl.pad : null);
+            m_RightTeam.AssignScheme(pr.Scheme, pr.useGamepad ? pr.pad : null);
             m_LeftTeam.EnableInput();
             m_RightTeam.EnableInput();
         }
@@ -129,6 +131,7 @@ namespace Foosball
 
             var aim = team.Actions.FindAction("Aim");
             float x = aim != null ? aim.ReadValue<Vector2>().x : 0f;
+
             if (Mathf.Abs(x) > m_AxisThreshold && !m_AxisLatched[side])
             {
                 CycleFormation(side, x > 0 ? 1 : -1);

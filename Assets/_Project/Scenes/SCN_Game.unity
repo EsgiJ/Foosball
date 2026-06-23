@@ -2614,7 +2614,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 918775855270213279, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_CollisionDetection
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5335341342303308354, guid: 494e7e1c574b28748a5d831f6b6e3294, type: 3}
       propertyPath: m_Name
@@ -44816,7 +44816,7 @@ LineRenderer:
     colorGradient:
       serializedVersion: 2
       key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 0.08235294}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -44840,7 +44840,7 @@ LineRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 90
@@ -44866,12 +44866,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AimTrajectory
   m_FoosballTableObstaclesParent: {fileID: 371515800}
+  m_SimulationTimeStep: 0.007
   m_GhostBallPrefab: {fileID: 5335341342303308354, guid: fff876a83c409f1448c27ba45a46effc, type: 3}
   m_LineRenderer: {fileID: 1782201577}
   m_MaxPhysicsFrameIterations: 100
-  m_ShootPower: 100
+  m_ShootPower: 10
   m_UpdateInterval: 0.05
   m_FadeDuration: 0.15
+  m_EndAlphaScale: 0.3
 --- !u!1 &1789665142
 GameObject:
   m_ObjectHideFlags: 0
