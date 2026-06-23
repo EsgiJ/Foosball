@@ -13,7 +13,7 @@ namespace Foosball
         [SerializeField] private Button m_MainMenuButton;
         [SerializeField] private Button m_QuitButton;
 
-        [Header("Settings (opsiyonel)")]
+        [Header("Settings")]
         [SerializeField] private SettingsController m_Settings; 
 
         void Awake()
@@ -22,7 +22,7 @@ namespace Foosball
             if (m_MainMenuButton) m_MainMenuButton.onClick.AddListener(OnQuitToMenu);
             if (m_QuitButton)     m_QuitButton.onClick.AddListener(OnQuitGame);
             if (m_SettingsButton && m_Settings != null)
-                m_SettingsButton.onClick.AddListener(() => m_Settings.Open());
+                m_SettingsButton.onClick.AddListener(() => GameStateManager.Instance?.GoToSettings());
 
             if (m_PausePanel) m_PausePanel.SetActive(false);
         }

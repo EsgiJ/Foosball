@@ -46,7 +46,7 @@ namespace Foosball
             ApplyMaster(master); ApplyMusic(music); ApplySfx(sfx);
             RumbleManager.Instance?.SetEnabled(rumble);
 
-            if (m_BackButton)          m_BackButton.onClick.AddListener(Close);
+            if (m_BackButton) m_BackButton.onClick.AddListener(() => GameStateManager.Instance?.CloseSettings());
             if (m_ControlsButton)      m_ControlsButton.onClick.AddListener(OpenControls);
             if (m_ControlsCloseButton) m_ControlsCloseButton.onClick.AddListener(CloseControls);
 
@@ -54,19 +54,6 @@ namespace Foosball
             if (m_ControlsPanel) m_ControlsPanel.SetActive(false);
 
             FillControlsText();
-        }
-
-        public void Open()
-        {
-            if (m_Panel) m_Panel.SetActive(true);
-            if (m_BackButton != null)
-                UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(m_BackButton.gameObject);
-        }
-
-        public void Close()
-        {
-            if (m_ControlsPanel) m_ControlsPanel.SetActive(false);
-            if (m_Panel) m_Panel.SetActive(false);
         }
 
         private void OpenControls()  { if (m_ControlsPanel) m_ControlsPanel.SetActive(true); }

@@ -10,7 +10,8 @@ namespace Foosball
         Countdown,  
         Playing,    
         Goal,
-        Paused        
+        Paused,
+        Settings        
     }
 
     [DefaultExecutionOrder(-100)]   
@@ -48,7 +49,7 @@ namespace Foosball
             Debug.Log($"[GameState] {previous} -> {next}");
             OnStateChanged?.Invoke(previous, next);
         }
-        
+
         public void Pause()
         {
             if (CurrentState == GameState.Paused) return;
@@ -66,6 +67,9 @@ namespace Foosball
         public void StartCountdown()=> ChangeState(GameState.Countdown);
         public void StartPlaying()  => ChangeState(GameState.Playing);
         public void GoToGoal()      => ChangeState(GameState.Goal);
+        public void GoToSettings()  => ChangeState(GameState.Settings);
+        public void CloseSettings() => ChangeState(GameState.Paused);
+
         public static bool IsPlaying => Instance != null && Instance.CurrentState == GameState.Playing;
         public GameState PrePauseState { get; private set; } = GameState.Playing;
 
@@ -80,8 +84,9 @@ namespace Foosball
                 case GameState.Setup:     return to == GameState.Countdown;
                 case GameState.Countdown: return to == GameState.Playing;
                 case GameState.Playing:   return to == GameState.Goal || to == GameState.Paused;
-                case GameState.Paused:    return to == GameState.Playing; 
+                case GameState.Paused:    return to == GameState.Playing || to == GameState.Settings || to == GameState.MainMenu; 
                 case GameState.Goal:      return to == GameState.Countdown;
+                case GameState.Settings:  return to == GameState.MainMenu || to == GameState.Paused;
                 default: return false;
             }
         }

@@ -216,11 +216,13 @@ namespace Foosball
 
         private void HandleStateChanged(GameState previous, GameState next)
         {
-            if (previous == GameState.Paused)           
-            {
-                Time.timeScale = 1f;
-                AudioManager.Instance?.SetMusicPaused(false);
-            }
+            bool wasFrozen = previous == GameState.Paused || previous == GameState.Settings;
+            bool isFrozen  = next == GameState.Paused || next == GameState.Settings;
+
+            if (isFrozen)       Time.timeScale = 0f;
+            else if (wasFrozen) Time.timeScale = 1f;   
+
+            AudioManager.Instance?.SetMusicPaused(isFrozen);
 
             switch (next)
             {
@@ -256,7 +258,7 @@ namespace Foosball
                     GameJuiceManager.Instance?.VignetteEffect();
                     AudioManager.Instance?.PlayMenuMusic();
                     break;    
-                    
+
                 case GameState.MainMenu:
                     DisableInput();
                     EndControl();

@@ -30,7 +30,7 @@ namespace Foosball
         }
 
         [Header("Global")]
-        [SerializeField] private bool m_Enabled = true;
+        [SerializeField] private bool m_RumbleEnabled = true;
 
         private readonly Dictionary<Gamepad, Coroutine> m_Active = new();
 
@@ -46,13 +46,13 @@ namespace Foosball
 
         public void SetEnabled(bool on)
         {
-            m_Enabled = on;
+            m_RumbleEnabled = on;
             if (!on) StopAll();
         }
 
         public void Rumble(Gamepad pad, float low, float high, float duration)
         {
-            if (!m_Enabled || pad == null) return;
+            if (!m_RumbleEnabled || pad == null) return;
 
             if (m_Active.TryGetValue(pad, out var co) && co != null)
                 StopCoroutine(co);
