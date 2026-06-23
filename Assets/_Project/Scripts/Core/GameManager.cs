@@ -131,6 +131,10 @@ namespace Foosball
                 Debug.Log($"[GameManager] Away Team({m_AwayTeam.teamName}) scored!");
             }
 
+            var scorer   = isHome ? m_HomeTeam.AssignedGamepad : m_AwayTeam.AssignedGamepad;
+            var conceder = isHome ? m_AwayTeam.AssignedGamepad : m_HomeTeam.AssignedGamepad;
+            RumbleManager.Instance?.RumbleGoal(scorer, conceder);
+
             GameJuiceManager.Instance?.ChromaticAberrationEffect();
             GameJuiceManager.Instance?.PauseGame(0.1f);          
             GameJuiceManager.Instance?.SlowMotion(0.3f, 0.6f);  
@@ -212,6 +216,12 @@ namespace Foosball
 
         private void HandleStateChanged(GameState previous, GameState next)
         {
+            if (previous == GameState.Paused)           
+            {
+                Time.timeScale = 1f;
+                AudioManager.Instance?.SetMusicPaused(false);
+            }
+
             switch (next)
             {
                 case GameState.Countdown:
@@ -223,18 +233,30 @@ namespace Foosball
                     }
                     StartKickoffSequence();
                     break;
+
                 case GameState.Playing:
                     EnableInput();
-                    NudgeBall();
+                    if (previous != GameState.Paused) 
+                        NudgeBall();
                     break;
+
+                case GameState.Paused:
+                    DisableInput();
+                    Time.timeScale = 0f;
+                    RumbleManager.Instance?.StopAll();
+                    AudioManager.Instance?.SetMusicPaused(true);
+                    break;
+
                 case GameState.Goal:
                     DisableInput();
                     break;
+
                 case GameState.Setup:
                     EndControl();
                     GameJuiceManager.Instance?.VignetteEffect();
                     AudioManager.Instance?.PlayMenuMusic();
                     break;    
+                    
                 case GameState.MainMenu:
                     DisableInput();
                     EndControl();

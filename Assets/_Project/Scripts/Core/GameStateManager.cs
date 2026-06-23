@@ -9,7 +9,8 @@ namespace Foosball
         Setup,   
         Countdown,  
         Playing,    
-        Goal        
+        Goal,
+        Paused        
     }
 
     [DefaultExecutionOrder(-100)]   
@@ -47,13 +48,26 @@ namespace Foosball
             Debug.Log($"[GameState] {previous} -> {next}");
             OnStateChanged?.Invoke(previous, next);
         }
+        
+        public void Pause()
+        {
+            if (CurrentState == GameState.Paused) return;
+            PrePauseState = CurrentState;
+            ChangeState(GameState.Paused);
+        }
 
+        public void Resume()
+        {
+            if (CurrentState != GameState.Paused) return;
+            ChangeState(PrePauseState);
+        }
         public void GoToMainMenu()  => ChangeState(GameState.MainMenu);
         public void GoToSetup()     => ChangeState(GameState.Setup);
         public void StartCountdown()=> ChangeState(GameState.Countdown);
         public void StartPlaying()  => ChangeState(GameState.Playing);
         public void GoToGoal()      => ChangeState(GameState.Goal);
         public static bool IsPlaying => Instance != null && Instance.CurrentState == GameState.Playing;
+        public GameState PrePauseState { get; private set; } = GameState.Playing;
 
         private bool IsTransitionAllowed(GameState from, GameState to)
         {
@@ -65,7 +79,8 @@ namespace Foosball
                 case GameState.MainMenu:  return to == GameState.Setup;
                 case GameState.Setup:     return to == GameState.Countdown;
                 case GameState.Countdown: return to == GameState.Playing;
-                case GameState.Playing:   return to == GameState.Goal;
+                case GameState.Playing:   return to == GameState.Goal || to == GameState.Paused;
+                case GameState.Paused:    return to == GameState.Playing; 
                 case GameState.Goal:      return to == GameState.Countdown;
                 default: return false;
             }

@@ -36,6 +36,7 @@ namespace Foosball
 
         private InputDevice m_AssignedDevice;
         public Gamepad AssignedGamepad => m_AssignedDevice as Gamepad;
+
     #endregion
     #region Unity Lifecycle
         void Awake()
@@ -61,11 +62,12 @@ namespace Foosball
             {
                 m_Actions.bindingMask = InputBinding.MaskByGroup(scheme.Value.bindingGroup);
             }
+
             if (device != null)
             {
                 m_Actions.devices = new InputDevice[] { device };                
             }
-            
+
             m_AssignedDevice = device;
             CurrentScheme = schemeName;
 
@@ -77,8 +79,11 @@ namespace Foosball
             {
                 foreach (var rod in m_RodControllers)
                 {
-                    if (rod != null) 
+                    if (rod != null)
+                    {
                         rod.InitializeInput(m_Actions);
+                        rod.SetGamepad(device as Gamepad);
+                    }
                 }
             }
 

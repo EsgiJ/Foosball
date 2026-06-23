@@ -12,6 +12,10 @@ namespace Foosball
         private AudioSource[] m_AudioSourcePool;
         private int m_PoolIndex = 0;
 
+        [Header("Mixer")]
+        [SerializeField] private UnityEngine.Audio.AudioMixerGroup m_MusicGroup;
+        [SerializeField] private UnityEngine.Audio.AudioMixerGroup m_SfxGroup;
+
         [Header("Ball Hit Clips")]
         [SerializeField] private AudioClip m_BallHitClip; 
 
@@ -93,7 +97,11 @@ namespace Foosball
                     go.transform.SetParent(transform);
                     m_AudioSourcePool[i] = go.AddComponent<AudioSource>();
                     m_AudioSourcePool[i].playOnAwake = false;
+                    m_AudioSourcePool[i].outputAudioMixerGroup = m_SfxGroup;   
                 }
+
+                if (m_MusicSource != null) 
+                    m_MusicSource.outputAudioMixerGroup = m_MusicGroup;
             }
 
             void Start()
@@ -238,6 +246,16 @@ namespace Foosball
                 StopCoroutine(m_PlaylistRoutine); 
                 m_PlaylistRoutine = null; 
             }
+        }
+
+        public void SetMusicPaused(bool paused)
+        {
+            if (m_MusicSource == null)
+                return;
+            if (paused) 
+                m_MusicSource.Pause();
+            else 
+                m_MusicSource.UnPause();
         }
 
         public void DuckMusic(float ducked = 0.2f, float hold = 1.5f, float fadeIn = 0.1f, float fadeOut = 0.5f)

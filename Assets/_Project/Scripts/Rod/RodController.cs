@@ -24,6 +24,10 @@ namespace Foosball.Rod
         [SerializeField] private GameObject m_FootballPlayer;
         [SerializeField] private BallController m_BallController;
 
+
+        private Gamepad m_Gamepad;
+        public void SetGamepad(Gamepad pad) => m_Gamepad = pad;
+
         private List<GameObject> m_FootballPlayers = new List<GameObject>();
         private BallController m_OwnedBall = null;
         private Rigidbody m_Rigidbody;
@@ -377,6 +381,7 @@ namespace Foosball.Rod
                 ball.StopBall();
                 AttachBallToRod(ball, contactingPlayer);
                 AudioManager.Instance?.PlayDefenseCatch();
+                RumbleManager.Instance?.RumbleBlock(m_Gamepad);
                 SetState(ERodState.AttackStance);
             }   
             else if (m_IsStanceHeld && m_CurrentRodState == ERodState.AttackStance)
@@ -387,6 +392,7 @@ namespace Foosball.Rod
 
         public void HandleStun(BallController ball)
         {
+            RumbleManager.Instance?.RumbleStun(m_Gamepad);
             SetState(ERodState.Stunned);
         }
 
