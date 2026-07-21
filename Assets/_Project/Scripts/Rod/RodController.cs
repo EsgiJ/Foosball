@@ -24,6 +24,29 @@ namespace Foosball.Rod
         [SerializeField] private GameObject m_FootballPlayer;
         [SerializeField] private BallController m_BallController;
 
+        [Header("Pass")]
+        [SerializeField] private float m_PassWindup = 0.3f;   
+        [SerializeField] private float m_PassThrow  = 0.5f;   
+        [SerializeField] private float m_PassWindupTime = 0.07f;
+        [SerializeField] private float m_PassThrowTime  = 0.08f;
+        [SerializeField] private float m_PassSettleTime = 0.07f;
+        [SerializeField] private bool  m_InvertPassDirection = false;
+
+        private float m_RawAimZ;
+        private int   m_HeldPlayerIndex = -1;
+        private bool  m_PassLatched = false;
+        private bool  m_IsPassing   = false;
+        private float m_PassBaseZ;
+        private Tween m_PassTween;
+
+        [Header("Defense Dash")]
+        [SerializeField] private float m_DashDistance = 20.0f;
+        [SerializeField] private float m_DashTime = 0.09f;
+        [SerializeField] private float m_DashSettleTime = 0.12f;
+        private bool m_IsDashing = false;
+        private Tween m_DashTween;
+        private InputAction m_DashAction;
+
 
         private Gamepad m_Gamepad;
         public void SetGamepad(Gamepad pad) => m_Gamepad = pad;
@@ -36,6 +59,7 @@ namespace Foosball.Rod
         InputAction m_MoveAction;
         InputAction m_AimAction ;
         InputAction m_StanceAction;
+        InputAction m_PassAction;
 
         private Vector2 m_AimVector = Vector2.zero;
         private Tween m_CurrentRotationTween;
@@ -86,7 +110,10 @@ namespace Foosball.Rod
         {
             if(m_CurrentRodState != ERodState.Stunned && m_RodPossessed)
             {
-                HandleMovement();
+                if (!m_IsPassing && !m_IsDashing)
+                {
+                    HandleMovement();                    
+                }
                 HandleAim();
                 ShowAimTrajectory();
             }
@@ -97,6 +124,8 @@ namespace Foosball.Rod
             m_ShootAction.started -= OnShootPressed;
             m_StanceAction.started -= OnStancePressed;
             m_StanceAction.canceled -= OnStanceReleased;
+            m_PassAction.started   -= OnPassPressed;
+            m_DashAction.started   -= OnDashPressed;
         }
     #endregion
 
@@ -108,6 +137,8 @@ namespace Foosball.Rod
             m_MoveAction   = actions.FindAction("MoveRod");
             m_AimAction    = actions.FindAction("Aim");
             m_StanceAction = actions.FindAction("Stance");
+            m_PassAction   = actions.FindAction("Pass");
+            m_DashAction = actions.FindAction("Dash");
         }
 
         private void InitializePhysics()
@@ -173,7 +204,8 @@ namespace Foosball.Rod
                 m_ShootAction.started += OnShootPressed;
                 m_StanceAction.started += OnStancePressed;
                 m_StanceAction.canceled += OnStanceReleased;
-
+                m_PassAction.started   += OnPassPressed;
+                m_DashAction.started   += OnDashPressed;
                 AudioManager.Instance?.PlayPossessSwitch();
                 PlayWiggleEffect();
                 ShowOutline();
@@ -183,6 +215,9 @@ namespace Foosball.Rod
                 m_ShootAction.started -= OnShootPressed;
                 m_StanceAction.started -= OnStancePressed;
                 m_StanceAction.canceled -= OnStanceReleased;
+                m_PassAction.started   -= OnPassPressed;
+                m_DashAction.started   -= OnDashPressed;
+
                 AimTrajectory.Instance?.Hide(this);
 
                 HideOutline();
@@ -211,13 +246,130 @@ namespace Foosball.Rod
 
         private void HandleAim()
         {
-            if(m_AimAction == null)
+            if(m_AimAction == null) 
+            { 
+                Debug.LogWarning("Aim action not found!"); 
+                return; 
+            }
+
+            Vector2 raw = m_AimAction.ReadValue<Vector2>();
+            m_RawAimZ = raw.y;                          
+
+            m_AimVector = raw;
+            m_AimVector.x = IsHomeTeam() ? 1f : -1f;    
+        }
+
+        private void HandlePassInput(float rawX)
+        {
+            if (!m_HasBall || m_CurrentRodState != ERodState.AttackStance || m_IsPassing)
             {
-                Debug.LogWarning("Aim action not found!");
+                if (Mathf.Abs(rawX) < 0.25f) 
+                    m_PassLatched = false;
                 return;
             }
-            m_AimVector = m_AimAction.ReadValue<Vector2>();
-            m_AimVector.x = IsHomeTeam() ? 1f : -1f;
+
+            if (Mathf.Abs(rawX) > 0.5f && !m_PassLatched)
+            {
+                int dir = rawX > 0 ? 1 : -1;
+                if (m_InvertPassDirection) 
+                    dir = -dir;
+                TryPass(dir);
+                m_PassLatched = true;          
+            }
+            else if (Mathf.Abs(rawX) < 0.25f)
+            {
+                m_PassLatched = false;        
+            }
+        }
+
+        private void TryPass(int dir)
+        {
+            if (!m_HasBall || m_OwnedBall == null) 
+                return;
+
+            int target = m_HeldPlayerIndex + dir;
+            if (target < 0 || target >= m_FootballPlayers.Count) 
+                return;   
+
+            m_IsPassing = true;
+            AudioManager.Instance?.PlayStanceClick();          
+            GameJuiceManager.Instance?.ShakeCamera(0.08f, 0.1f);
+            PlayPassFlick(dir, target);
+        }
+
+        private void PlayPassFlick(int dir, int targetIndex)
+        {
+            m_PassTween?.Kill();
+            m_PassBaseZ = transform.localPosition.z;
+            float z = m_PassBaseZ;
+
+            Transform fromPlayer = m_FootballPlayers[m_HeldPlayerIndex].transform;
+            Transform toPlayer   = m_FootballPlayers[targetIndex].transform;
+
+            m_PassTween = DOTween.Sequence().SetLink(gameObject)
+                .Append(transform.DOLocalMoveZ(z - dir * m_PassWindup, m_PassWindupTime).SetEase(Ease.OutQuad))   
+                .AppendCallback(() =>
+                {
+                    if (m_OwnedBall != null)
+                        m_OwnedBall.PassToPlayer(this, fromPlayer, toPlayer, m_PassThrowTime + m_PassSettleTime); 
+                    m_HeldPlayerIndex = targetIndex;
+                })
+                .Append(transform.DOLocalMoveZ(z + dir * m_PassThrow, m_PassThrowTime).SetEase(Ease.OutBack))     
+                .Append(transform.DOLocalMoveZ(z, m_PassSettleTime).SetEase(Ease.OutQuad))                        
+                .OnComplete(() => m_IsPassing = false);
+        }
+
+        private void ReattachBallTo(int index)
+        {
+            if (m_OwnedBall == null || index < 0 || index >= m_FootballPlayers.Count) 
+                return;
+            m_OwnedBall.AttachToRod(this, m_FootballPlayers[index].transform);   
+            m_HeldPlayerIndex = index;
+        }
+
+        private void CancelPass()
+        {
+            if (!m_IsPassing) 
+                return;
+            m_PassTween?.Kill();
+            var p = transform.localPosition; 
+            p.z = m_PassBaseZ; 
+            transform.localPosition = p;  
+            m_IsPassing = false;
+        }
+
+        private void AttachBallToRod(BallController ball, Transform playerTransform)
+        {
+            ball.AttachToRod(this, playerTransform);
+            m_HeldPlayerIndex = m_FootballPlayers.IndexOf(playerTransform.gameObject);
+            Debug.Log($"Ball attached to rod via {playerTransform.name}");
+        }
+
+        private void OnDashPressed(InputAction.CallbackContext ctx)
+        {
+            if (m_CurrentRodState != ERodState.DefenseStance || m_IsDashing) return;
+            if (m_MoveAction == null) return;
+
+            float axis = m_MoveAction.ReadValue<float>();
+            if (Mathf.Abs(axis) < 0.2f) 
+                return;       
+            DefenseDash(axis > 0 ? 1 : -1);
+        }
+
+        private void DefenseDash(int dir)
+        {
+            m_DashTween?.Kill();
+            m_IsDashing = true;
+
+            float baseZ = transform.localPosition.z;
+            float target = Mathf.Clamp(baseZ + dir * m_DashDistance, m_RodConfig.MinZPos, m_RodConfig.MaxZPos);
+
+            AudioManager.Instance?.PlayStanceClick();   
+
+            m_DashTween = DOTween.Sequence().SetLink(gameObject)
+                .Append(transform.DOLocalMoveZ(target, m_DashTime).SetEase(Ease.OutQuad))        
+                .Append(transform.DOLocalMoveZ(target, m_DashSettleTime).SetEase(Ease.OutBack))  
+                .OnComplete(() => m_IsDashing = false);
         }
 
         private void OnShootPressed(InputAction.CallbackContext context)
@@ -270,6 +422,25 @@ namespace Foosball.Rod
             SetState(ERodState.Idle);
             Debug.Log("RodState changed to Idle");
         }
+
+        private void OnPassPressed(InputAction.CallbackContext context)
+        {
+            if (m_CurrentRodState == ERodState.Stunned) 
+                return;
+
+            if (!m_HasBall || m_CurrentRodState != ERodState.AttackStance || m_IsPassing) 
+                return;
+
+            if (Mathf.Abs(m_RawAimZ) < 0.3f) 
+                return;     
+
+            int dir = m_RawAimZ > 0 ? 1 : -1;
+            if (m_InvertPassDirection) 
+            {
+                dir = -dir;
+            }
+            TryPass(dir);
+        }
     #endregion
 
     #region State Management
@@ -305,6 +476,9 @@ namespace Foosball.Rod
 
         private void OnEnterIdle()
         {
+            m_DashTween?.Kill();
+            m_IsDashing = false;
+
             ReleaseBall();
             m_CurrentRotationTween = transform
                 .DOLocalRotateQuaternion(m_StartRotation, 0.1f)
@@ -320,6 +494,9 @@ namespace Foosball.Rod
 
         private void OnEnterAttackStance()
         {
+            m_DashTween?.Kill();
+            m_IsDashing = false;
+
             AudioManager.Instance?.PlayStanceClick();
             float rodRotationBasedOnTeam = m_RodConfig.AttackRotation * (IsHomeTeam() ? 1 : -1);
             m_CurrentRotationTween = RotateRodTo(rodRotationBasedOnTeam, m_RodConfig.AttackStanceDuration, m_RodConfig.AttackStanceEase);
@@ -372,16 +549,22 @@ namespace Foosball.Rod
     #region Event Handling
         public void HandleBallContact(BallController ball, Transform contactingPlayer)
         {
+            if (m_IsPassing) 
+                return;
             m_OwnedBall = ball;
             m_HasBall = true;
 
             if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
             {
+                float s = Mathf.Clamp(ball.GetLinearVelocity().magnitude / 15f, 0.6f, 1.5f);
+                VFXManager.Instance?.PlayBlock(contactingPlayer.position, s);
+
                 PlayStruggleEffect(ball);
                 ball.StopBall();
                 AttachBallToRod(ball, contactingPlayer);
                 AudioManager.Instance?.PlayDefenseCatch();
                 RumbleManager.Instance?.RumbleBlock(m_Gamepad);
+
                 SetState(ERodState.AttackStance);
             }   
             else if (m_IsStanceHeld && m_CurrentRodState == ERodState.AttackStance)
@@ -393,25 +576,23 @@ namespace Foosball.Rod
         public void HandleStun(BallController ball)
         {
             RumbleManager.Instance?.RumbleStun(m_Gamepad);
+            VFXManager.Instance?.PlayStun(ball.transform.position);
             SetState(ERodState.Stunned);
         }
 
     #endregion
 
-        private void AttachBallToRod(BallController ball, Transform playerTransform)
-        {
-            ball.AttachToRod(this, playerTransform);
-            Debug.Log($"Ball attached to rod via {playerTransform.name}");
-        }
-
         public void ReleaseBall()
         {
+            CancelPass();
+
             if (m_OwnedBall != null)
             {
                 m_OwnedBall.DetachFromRod();
                 m_OwnedBall = null;
                 m_HasBall = false;
-                
+                m_HeldPlayerIndex = -1;
+
                 Debug.Log("Ball released from rod");
             }
         }

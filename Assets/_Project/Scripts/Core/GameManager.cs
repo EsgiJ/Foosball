@@ -262,6 +262,7 @@ namespace Foosball
                 case GameState.MainMenu:
                     DisableInput();
                     EndControl();
+                    ResetGame();
                     AudioManager.Instance?.PlayMenuMusic();
                     break;
             }

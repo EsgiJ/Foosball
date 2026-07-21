@@ -20,6 +20,8 @@ namespace Foosball
         /* Attachment */
         [SerializeField] private float m_AttachmentDuration = 0.1f;
 
+        private Tween m_PassTravelTween;
+        private float m_PassT;
         private Tween m_AttachToRodTween;
         private RodController m_AttachedRod = null;
         private Transform m_AttachedPlayerTransform = null;
@@ -89,6 +91,7 @@ namespace Foosball
                 // false because away scored
                 GameEvents.RaiseGoalEvent(false);
                 AudioManager.Instance?.PlayGoal();
+                VFXManager.Instance?.PlayGoal(transform.position);
             }
 
             if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Away"))
@@ -96,6 +99,7 @@ namespace Foosball
                 // true because home scored
                 GameEvents.RaiseGoalEvent(true);
                 AudioManager.Instance?.PlayGoal();
+                VFXManager.Instance?.PlayGoal(transform.position);
             }
         }
 
@@ -115,6 +119,9 @@ namespace Foosball
 
             float vol = Mathf.Clamp01(impact / 20f);  
             AudioManager.Instance?.PlayWallBounce(vol);
+
+            ContactPoint c = collision.GetContact(0);
+            VFXManager.Instance?.PlayWallHit(c.point, Mathf.Lerp(0.6f, 1.4f, vol));
         }
     #endregion
 
@@ -190,6 +197,35 @@ namespace Foosball
             m_Rigidbody.angularVelocity = Vector3.zero;
         }
 
+        public void PassToPlayer(RodController rod, Transform fromPlayer, Transform toPlayer, float duration)
+        {
+            m_AttachToRodTween?.Kill();
+            m_PassTravelTween?.Kill();
+
+            m_AttachedRod = rod;
+            m_IsAttached = true;                 
+            m_AttachedPlayerTransform = null;    
+            m_LastAttachedRodShootDuration = rod.GetShootAnimationDuration();
+
+            float offsetX = rod.IsHomeTeam() ? 0.25f : -0.25f;
+            m_PassT = 0f;
+
+            m_PassTravelTween = DOTween.To(() => m_PassT, x => m_PassT = x, 1f, duration)
+                .SetEase(Ease.InOutQuad)
+                .OnUpdate(() =>
+                {
+                    Vector3 pos = Vector3.Lerp(fromPlayer.position, toPlayer.position, m_PassT);
+                    pos.x += offsetX;
+                    pos.y = transform.position.y;
+                    transform.position = pos;
+                })
+                .OnComplete(() =>
+                {
+                    m_AttachmentOffset = new Vector3(offsetX, 0f, 0f);
+                    m_AttachedPlayerTransform = toPlayer;   
+                })
+                .SetLink(gameObject);
+        }
     #endregion
 
     #region Shoot
