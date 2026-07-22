@@ -187,9 +187,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 459538806cd882b4bad913058131df4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BallController
-  m_ShootPower: 50
-  m_SphereRadius: 0.6
-  m_AttachmentDuration: 0.1
+  m_BallConfig: {fileID: 11400000, guid: f518570fa076fc4438950a6f77c6f154, type: 2}
 --- !u!96 &6832807032366724129
 TrailRenderer:
   serializedVersion: 4

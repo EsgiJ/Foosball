@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a29b5e459f1dc14f926fc7cb08f9e42, type: 3}
+  m_Name: AudioConfig_Default
+  m_EditorClassIdentifier: Assembly-CSharp::Foosball.AudioConfig
+  PoolSize: 10
+  GlobalVolumeJitterMin: 0.9
+  GlobalVolumeJitterMax: 1
+  BallHit:
+    Clip: {fileID: 8300000, guid: 1fa549afb30c4be4c89026b956e0c832, type: 3}
+    Volume: 0.8
+    PitchMin: 0.95
+    PitchMax: 1.05
+  RodSwing:
+    Clip: {fileID: 8300000, guid: c4bbba00102f7fd46938337390fffa10, type: 3}
+    Volume: 0.8
+    PitchMin: 0.95
+    PitchMax: 1.05
+  StanceClick:
+    Clip: {fileID: 0}
+    Volume: 0.5
+    PitchMin: 0.95
+    PitchMax: 1.05
+  PossessSwitch:
+    Clip: {fileID: 8300000, guid: 81652031b64c342cc8dbc59c138d77c5, type: 3}
+    Volume: 0.4
+    PitchMin: 0.95
+    PitchMax: 1.05
+  NetHit:
+    Clip: {fileID: 8300000, guid: d11173872ea12fe48b5435f56a7d6917, type: 3}
+    Volume: 0.9
+    PitchMin: 0.97
+    PitchMax: 1.03
+  CrowdCelebration:
+    Clip: {fileID: 8300000, guid: 5bdb0e6fbabd4524486315597255b63e, type: 3}
+    Volume: 0.85
+    PitchMin: 0.98
+    PitchMax: 1.02
+  Goal:
+    Clip: {fileID: 8300000, guid: d11173872ea12fe48b5435f56a7d6917, type: 3}
+    Volume: 0.5
+    PitchMin: 0.95
+    PitchMax: 1.05
+  Stun:
+    Clip: {fileID: 8300000, guid: e5099966506af9a4b8a758ad16897cd9, type: 3}
+    Volume: 0.7
+    PitchMin: 0.9
+    PitchMax: 1.1
+  CountdownTick:
+    Clip: {fileID: 8300000, guid: 19f89c6e740e7447f9e12a8310d3e973, type: 3}
+    Volume: 0.6
+    PitchMin: 1
+    PitchMax: 1
+  CountdownGo:
+    Clip: {fileID: 0}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+  MenuButton:
+    Clip: {fileID: 8300000, guid: 87ea497d7eae7664da9011d36a8f3dc3, type: 3}
+    Volume: 0.5
+    PitchMin: 0.95
+    PitchMax: 1.05
+  ToggleReady:
+    Clip: {fileID: 8300000, guid: 403c02c2b85f6e4409aabd1740d7be8c, type: 3}
+    Volume: 0.5
+    PitchMin: 0.95
+    PitchMax: 1.05
+  SwapSides:
+    Clip: {fileID: 8300000, guid: f4b38478dde5acb40a3dc29017a2c34c, type: 3}
+    Volume: 0.5
+    PitchMin: 0.95
+    PitchMax: 1.05
+  DefenseCatch:
+    Clip: {fileID: 8300000, guid: 93d71b72e0509f04fae0d15ce7bcbfc9, type: 3}
+    Volume: 0.7
+    PitchMin: 0.95
+    PitchMax: 1.05
+  WallBounce:
+    Clip: {fileID: 8300000, guid: fedad6e047daeaf46bdb161d8fdcc0f4, type: 3}
+    Volume: 0.6
+    PitchMin: 0.9
+    PitchMax: 1.1
+  GoalCrowdCelebrationDelay: 0.15
+  GoalDuckVolume: 0.2
+  GoalDuckHold: 1.5
+  GoalDuckFadeIn: 0.1
+  GoalDuckFadeOut: 0.5
+  MenuMusic: {fileID: 8300000, guid: 4b046cb089e258645b3d18cf58f02465, type: 3}
+  GameplayTracks:
+  - {fileID: 8300000, guid: 77fc5e1aa88b68a4cb3e99c2c5ab7135, type: 3}
+  - {fileID: 8300000, guid: 98090b06bbe439a40bf593ee0a375020, type: 3}
+  - {fileID: 8300000, guid: f384ba786c48dca479467ee50e2d4bd5, type: 3}
+  - {fileID: 8300000, guid: c378e5ad9e53dc845882dae06dd9d726, type: 3}
+  MusicVolume: 0.3
+  MusicFadeDuration: 1
