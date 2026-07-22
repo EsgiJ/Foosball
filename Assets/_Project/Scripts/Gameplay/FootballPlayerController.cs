@@ -1,14 +1,12 @@
 using UnityEngine;
+using Foosball.Data;
 
 namespace Foosball.Gameplay
 {
     public class FootballPlayerController : MonoBehaviour
     {
-        [Header("Player Setup")]
-        [SerializeField] private float m_PlayerRadius = 1f;
-        [SerializeField] private float m_PlayerHeight = 2f;
-
-        [SerializeField] private float m_BallVelocityThreshold = 100f;
+        [Header("Config")]
+        [SerializeField] private RodConfig m_RodConfig;
 
         /* References */
         private RodController m_RodController;
@@ -65,8 +63,8 @@ namespace Foosball.Gameplay
                 m_Collider = gameObject.AddComponent<CapsuleCollider>();
             }
 
-            m_Collider.radius = m_PlayerRadius;
-            m_Collider.height = m_PlayerHeight;
+            m_Collider.radius = m_RodConfig.PlayerRadius;
+            m_Collider.height = m_RodConfig.PlayerHeight;
             m_Collider.isTrigger = true;
 
             gameObject.tag = "Rod_Player";
@@ -85,7 +83,7 @@ namespace Foosball.Gameplay
 
                 Debug.Log($"Received ball velocity: {ballVelocity.magnitude}");
 
-                if(ballVelocity.magnitude > m_BallVelocityThreshold && m_RodController.GetState() != RodController.ERodState.DefenseStance)
+                if(ballVelocity.magnitude > m_RodConfig.StunVelocityThreshold && m_RodController.GetState() != RodController.ERodState.DefenseStance)
                 {
                     m_RodController.HandleStun(ball);
                     Debug.Log($"{gameObject.name} was stunned by the ball with velocity {ballVelocity.magnitude}");

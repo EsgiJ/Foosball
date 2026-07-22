@@ -63,11 +63,7 @@ namespace Foosball.Presentation
         private void HandleGoalFeedback(GoalFeedbackEvent evt)
         {
             m_RumbleManager?.RumbleGoal(evt.Scorer, evt.Conceder);
-            m_GameJuiceManager?.ChromaticAberrationEffect();
-            m_GameJuiceManager?.PauseGame(0.1f);
-            m_GameJuiceManager?.SlowMotion(0.3f, 0.6f);
-            m_GameJuiceManager?.ShakeCamera(0.5f, 0.6f);
-            m_GameJuiceManager?.VignetteEffect();
+            m_GameJuiceManager?.PlayGoalPunch();
         }
     #endregion
 
@@ -75,7 +71,7 @@ namespace Foosball.Presentation
         private void HandleShoot(ShootEvent evt)
         {
             m_AudioManager?.PlayShoot();
-            m_GameJuiceManager?.ShakeCamera(0.15f, 0.2f);
+            m_GameJuiceManager?.PlayShootShake();
         }
 
         private void HandlePossessSwitch(PossessSwitchEvent evt)
@@ -91,7 +87,7 @@ namespace Foosball.Presentation
         private void HandlePassAttempted(PassAttemptedEvent evt)
         {
             m_AudioManager?.PlayStanceClick();
-            m_GameJuiceManager?.ShakeCamera(0.08f, 0.1f);
+            m_GameJuiceManager?.PlayPassShake();
         }
 
         private void HandleDashAttempted(DashAttemptedEvent evt)
@@ -104,8 +100,7 @@ namespace Foosball.Presentation
             m_AudioManager?.PlayStun();
             m_VFXManager?.PlayStun(evt.Position);
             m_RumbleManager?.RumbleStun(evt.Gamepad);
-            m_GameJuiceManager?.ShakeCamera(0.3f, 0.5f);
-            m_GameJuiceManager?.PauseGame(0.08f);
+            m_GameJuiceManager?.PlayStunPunch();
         }
 
         private void HandleBlock(BlockEvent evt)
@@ -113,14 +108,7 @@ namespace Foosball.Presentation
             m_VFXManager?.PlayBlock(evt.Position, evt.VfxScale);
             m_AudioManager?.PlayDefenseCatch();
             m_RumbleManager?.RumbleBlock(evt.Gamepad);
-
-            if (Mathf.Abs(evt.BallVelocityX) >= 0.1f)
-            {
-                float intensity = Mathf.Clamp01(evt.BallSpeed / 30f);
-                m_GameJuiceManager?.ShakeCamera(0.15f, intensity * 0.25f);
-                if (intensity > 0.6f)
-                    m_GameJuiceManager?.PauseGame(0.1f);
-            }
+            m_GameJuiceManager?.PlayBlockPunch(evt.BallVelocityX, evt.BallSpeed);
         }
     #endregion
 
@@ -147,7 +135,7 @@ namespace Foosball.Presentation
     #region Table
         private void HandleTableShaken(TableShakenEvent evt)
         {
-            m_GameJuiceManager?.ShakeCamera(0.5f, 0.5f);
+            m_GameJuiceManager?.PlayTableShake();
         }
     #endregion
 

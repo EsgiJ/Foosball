@@ -32,17 +32,7 @@ namespace Foosball.Gameplay
         [SerializeField] private BallController m_BallController;
 
         [Header("Pass")]
-        [SerializeField] private float m_PassWindup = 0.3f;
-        [SerializeField] private float m_PassThrow  = 0.5f;
-        [SerializeField] private float m_PassWindupTime = 0.07f;
-        [SerializeField] private float m_PassThrowTime  = 0.08f;
-        [SerializeField] private float m_PassSettleTime = 0.07f;
         [SerializeField] private bool  m_InvertPassDirection = false;
-
-        [Header("Defense Dash")]
-        [SerializeField] private float m_DashDistance = 20.0f;
-        [SerializeField] private float m_DashTime = 0.09f;
-        [SerializeField] private float m_DashSettleTime = 0.12f;
 
         /* Injected dependencies */
         private AimTrajectory m_AimTrajectory;
@@ -212,7 +202,7 @@ namespace Foosball.Gameplay
         {
             var renderers = GetComponentsInChildren<Renderer>(true);
 
-            Color teamColor = IsHomeTeam() ? Color.red : new Color(0.20f, 0.50f, 1.00f);
+            Color teamColor = IsHomeTeam() ? m_RodConfig.HomeColor : m_RodConfig.AwayColor;
 
             foreach (var r in renderers)
             {
@@ -300,7 +290,7 @@ namespace Foosball.Gameplay
                     foreach (var o in m_Outlines)
                         if (o != null) o.OutlineWidth = v;
                 })
-                .SetEase(Ease.OutBack)
+                .SetEase(m_RodConfig.OutlineShowEase)
                 .SetLink(gameObject);
         }
 
@@ -314,7 +304,7 @@ namespace Foosball.Gameplay
                     foreach (var o in m_Outlines)
                         if (o != null) o.OutlineWidth = v;
                 })
-                .SetEase(Ease.InQuad)
+                .SetEase(m_RodConfig.OutlineHideEase)
                 .OnComplete(() =>
                 {
                     foreach (var o in m_Outlines)
@@ -410,7 +400,7 @@ namespace Foosball.Gameplay
             if (!m_HasBall || m_CurrentRodState != ERodState.AttackStance || m_IsPassing)
                 return;
 
-            if (Mathf.Abs(m_RawAimZ) < 0.3f)
+            if (Mathf.Abs(m_RawAimZ) < m_RodConfig.PassInputDeadzone)
                 return;
 
             int dir = m_RawAimZ > 0 ? 1 : -1;
@@ -445,15 +435,15 @@ namespace Foosball.Gameplay
             Transform toPlayer   = m_FootballPlayers[targetIndex].transform;
 
             m_PassTween = DOTween.Sequence().SetLink(gameObject)
-                .Append(transform.DOLocalMoveZ(z - dir * m_PassWindup, m_PassWindupTime).SetEase(Ease.OutQuad))
+                .Append(transform.DOLocalMoveZ(z - dir * m_RodConfig.PassWindupDistance, m_RodConfig.PassWindupTime).SetEase(m_RodConfig.PassWindupEase))
                 .AppendCallback(() =>
                 {
                     if (m_OwnedBall != null)
-                        m_OwnedBall.PassToPlayer(this, fromPlayer, toPlayer, m_PassThrowTime + m_PassSettleTime);
+                        m_OwnedBall.PassToPlayer(this, fromPlayer, toPlayer, m_RodConfig.PassThrowTime + m_RodConfig.PassSettleTime);
                     m_HeldPlayerIndex = targetIndex;
                 })
-                .Append(transform.DOLocalMoveZ(z + dir * m_PassThrow, m_PassThrowTime).SetEase(Ease.OutBack))
-                .Append(transform.DOLocalMoveZ(z, m_PassSettleTime).SetEase(Ease.OutQuad))
+                .Append(transform.DOLocalMoveZ(z + dir * m_RodConfig.PassThrowDistance, m_RodConfig.PassThrowTime).SetEase(m_RodConfig.PassThrowEase))
+                .Append(transform.DOLocalMoveZ(z, m_RodConfig.PassSettleTime).SetEase(m_RodConfig.PassSettleEase))
                 .OnComplete(() => m_IsPassing = false);
         }
 
@@ -476,7 +466,7 @@ namespace Foosball.Gameplay
             if (m_MoveAction == null) return;
 
             float axis = m_MoveAction.ReadValue<float>();
-            if (Mathf.Abs(axis) < 0.2f)
+            if (Mathf.Abs(axis) < m_RodConfig.DashInputDeadzone)
                 return;
             DefenseDash(axis > 0 ? 1 : -1);
         }
@@ -487,13 +477,13 @@ namespace Foosball.Gameplay
             m_IsDashing = true;
 
             float baseZ = transform.localPosition.z;
-            float target = Mathf.Clamp(baseZ + dir * m_DashDistance, m_RodConfig.MinZPos, m_RodConfig.MaxZPos);
+            float target = Mathf.Clamp(baseZ + dir * m_RodConfig.DashDistance, m_RodConfig.MinZPos, m_RodConfig.MaxZPos);
 
             m_EventBus?.Publish(new DashAttemptedEvent());
 
             m_DashTween = DOTween.Sequence().SetLink(gameObject)
-                .Append(transform.DOLocalMoveZ(target, m_DashTime).SetEase(Ease.OutQuad))
-                .Append(transform.DOLocalMoveZ(target, m_DashSettleTime).SetEase(Ease.OutBack))
+                .Append(transform.DOLocalMoveZ(target, m_RodConfig.DashTime).SetEase(m_RodConfig.DashMoveEase))
+                .Append(transform.DOLocalMoveZ(target, m_RodConfig.DashSettleTime).SetEase(m_RodConfig.DashSettleEase))
                 .OnComplete(() => m_IsDashing = false);
         }
     #endregion
@@ -566,8 +556,8 @@ namespace Foosball.Gameplay
 
             ReleaseBall();
             m_CurrentRotationTween = transform
-                .DOLocalRotateQuaternion(m_StartRotation, 0.1f)
-                .SetEase(Ease.OutQuad)
+                .DOLocalRotateQuaternion(m_StartRotation, m_RodConfig.IdleReturnDuration)
+                .SetEase(m_RodConfig.IdleReturnEase)
                 .SetLink(gameObject);
         }
 
@@ -636,7 +626,7 @@ namespace Foosball.Gameplay
             if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
             {
                 Vector3 ballVelocity = ball.GetLinearVelocity();
-                float s = Mathf.Clamp(ballVelocity.magnitude / 15f, 0.6f, 1.5f);
+                float s = Mathf.Clamp(ballVelocity.magnitude / m_RodConfig.BlockVfxSpeedNormalizer, m_RodConfig.BlockVfxScaleMin, m_RodConfig.BlockVfxScaleMax);
 
                 PlayStruggleEffect(ball);
                 ball.StopBall();

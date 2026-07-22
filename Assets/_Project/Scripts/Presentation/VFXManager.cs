@@ -11,7 +11,7 @@ namespace Foosball.Presentation
         [SerializeField] private Material m_StunMat;
         [SerializeField] private Material m_BlockMat;
 
-        [Header("Flash Animasyonu")]
+        [Header("Flash Animation")]
         [SerializeField] private float m_BaseSize = 1.5f;
         [SerializeField] private float m_Duration = 0.35f;
         [SerializeField] private float m_StartScale = 0.3f;

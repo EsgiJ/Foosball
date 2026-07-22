@@ -79,5 +79,73 @@ namespace Foosball.Data
         public float OutlineWidth => m_OutlineWidth;
         [SerializeField, FormerlySerializedAs("OutlineFadeDuration")] private float m_OutlineFadeDuration = 0.2f;
         public float OutlineFadeDuration => m_OutlineFadeDuration;
+        [SerializeField] private Ease m_OutlineShowEase = Ease.OutBack;
+        public Ease OutlineShowEase => m_OutlineShowEase;
+        [SerializeField] private Ease m_OutlineHideEase = Ease.InQuad;
+        public Ease OutlineHideEase => m_OutlineHideEase;
+
+        [Header("Pass")]
+        [SerializeField, Min(0f)] private float m_PassWindupDistance = 0.3f;
+        public float PassWindupDistance => m_PassWindupDistance;
+        [SerializeField, Min(0f)] private float m_PassThrowDistance = 0.5f;
+        public float PassThrowDistance => m_PassThrowDistance;
+        [SerializeField, Min(0f)] private float m_PassWindupTime = 0.07f;
+        public float PassWindupTime => m_PassWindupTime;
+        [SerializeField, Min(0f)] private float m_PassThrowTime = 0.08f;
+        public float PassThrowTime => m_PassThrowTime;
+        [SerializeField, Min(0f)] private float m_PassSettleTime = 0.07f;
+        public float PassSettleTime => m_PassSettleTime;
+        [SerializeField] private Ease m_PassWindupEase = Ease.OutQuad;
+        public Ease PassWindupEase => m_PassWindupEase;
+        [SerializeField] private Ease m_PassThrowEase = Ease.OutBack;
+        public Ease PassThrowEase => m_PassThrowEase;
+        [SerializeField] private Ease m_PassSettleEase = Ease.OutQuad;
+        public Ease PassSettleEase => m_PassSettleEase;
+        [SerializeField, Min(0f)] private float m_PassInputDeadzone = 0.3f;
+        public float PassInputDeadzone => m_PassInputDeadzone;
+
+        [Header("Dash")]
+        [SerializeField, Min(0f)] private float m_DashDistance = 20.0f;
+        public float DashDistance => m_DashDistance;
+        [SerializeField, Min(0f)] private float m_DashTime = 0.09f;
+        public float DashTime => m_DashTime;
+        [SerializeField, Min(0f)] private float m_DashSettleTime = 0.12f;
+        public float DashSettleTime => m_DashSettleTime;
+        [SerializeField] private Ease m_DashMoveEase = Ease.OutQuad;
+        public Ease DashMoveEase => m_DashMoveEase;
+        [SerializeField] private Ease m_DashSettleEase = Ease.OutBack;
+        public Ease DashSettleEase => m_DashSettleEase;
+        [SerializeField, Min(0f)] private float m_DashInputDeadzone = 0.2f;
+        public float DashInputDeadzone => m_DashInputDeadzone;
+
+        [Header("Idle Return")]
+        [SerializeField, Min(0f)] private float m_IdleReturnDuration = 0.1f;
+        public float IdleReturnDuration => m_IdleReturnDuration;
+        [SerializeField] private Ease m_IdleReturnEase = Ease.OutQuad;
+        public Ease IdleReturnEase => m_IdleReturnEase;
+
+        [Header("Team Colors")]
+        [SerializeField] private Color m_HomeColor = Color.red;
+        public Color HomeColor => m_HomeColor;
+        [SerializeField] private Color m_AwayColor = new Color(0.20f, 0.50f, 1.00f);
+        public Color AwayColor => m_AwayColor;
+
+        [Header("Block Feedback")]
+        [SerializeField, Min(0.0001f), Tooltip("Ball speed is divided by this to normalize the block-flash VFX scale (distinct from JuiceConfig's shake-scale normalizer).")] private float m_BlockVfxSpeedNormalizer = 15f;
+        public float BlockVfxSpeedNormalizer => m_BlockVfxSpeedNormalizer;
+        [SerializeField] private float m_BlockVfxScaleMin = 0.6f;
+        public float BlockVfxScaleMin => m_BlockVfxScaleMin;
+        [SerializeField] private float m_BlockVfxScaleMax = 1.5f;
+        public float BlockVfxScaleMax => m_BlockVfxScaleMax;
+
+        [Header("Stun Velocity")]
+        [SerializeField, Min(0f), Tooltip("Ball speed above which a football player figure gets stunned on contact.")] private float m_StunVelocityThreshold = 100f;
+        public float StunVelocityThreshold => m_StunVelocityThreshold;
+
+        [Header("Player Collider")]
+        [SerializeField, Min(0f)] private float m_PlayerRadius = 1f;
+        public float PlayerRadius => m_PlayerRadius;
+        [SerializeField, Min(0f)] private float m_PlayerHeight = 2f;
+        public float PlayerHeight => m_PlayerHeight;
     }
 }

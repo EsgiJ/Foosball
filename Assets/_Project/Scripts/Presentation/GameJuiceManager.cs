@@ -176,4 +176,38 @@ public class GameJuiceManager : MonoBehaviour
     public void RestoreVignette() => RestoreVignette(m_JuiceConfig.VignetteRestoreDuration);
     public void RestoreVignette(float duration) => SetVignetteIntensity(m_JuiceConfig.DefaultVignetteIntensity, duration);
 #endregion
+
+#region Match Feedback Presets
+    public void PlayGoalPunch()
+    {
+        ChromaticAberrationEffect();
+        PauseGame(m_JuiceConfig.GoalPauseDuration);
+        SlowMotion(m_JuiceConfig.GoalSlowMoScale, m_JuiceConfig.GoalSlowMoHold);
+        ShakeCamera(m_JuiceConfig.GoalShakeDuration, m_JuiceConfig.GoalShakeStrength);
+        VignetteEffect();
+    }
+
+    public void PlayShootShake() => ShakeCamera(m_JuiceConfig.ShootShakeDuration, m_JuiceConfig.ShootShakeStrength);
+
+    public void PlayPassShake() => ShakeCamera(m_JuiceConfig.PassShakeDuration, m_JuiceConfig.PassShakeStrength);
+
+    public void PlayStunPunch()
+    {
+        ShakeCamera(m_JuiceConfig.StunShakeDuration, m_JuiceConfig.StunShakeStrength);
+        PauseGame(m_JuiceConfig.StunPauseDuration);
+    }
+
+    public void PlayBlockPunch(float ballVelocityX, float ballSpeed)
+    {
+        if (Mathf.Abs(ballVelocityX) < m_JuiceConfig.BlockVelocityDeadzone)
+            return;
+
+        float intensity = Mathf.Clamp01(ballSpeed / m_JuiceConfig.BlockSpeedNormalizer);
+        ShakeCamera(m_JuiceConfig.BlockShakeDuration, intensity * m_JuiceConfig.BlockShakeMaxStrength);
+        if (intensity > m_JuiceConfig.BlockPauseThreshold)
+            PauseGame(m_JuiceConfig.BlockPauseDuration);
+    }
+
+    public void PlayTableShake() => ShakeCamera(m_JuiceConfig.TableShakeDuration, m_JuiceConfig.TableShakeStrength);
+#endregion
 }
