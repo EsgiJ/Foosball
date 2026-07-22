@@ -26,6 +26,8 @@ namespace Foosball.Presentation
         private Coroutine m_PlaylistRoutine;
         private float m_MusicBaseVolume;
         private Tween m_DuckTween;
+        private Tween m_MusicFadeTween;
+        private Tween m_CrowdCelebrationTween;
 
     #region Unity Lifecycle
         void Awake()
@@ -105,7 +107,10 @@ namespace Foosball.Presentation
         public void PlayGoal()
         {
             PlayNetHit();
-            DOVirtual.DelayedCall(m_AudioConfig.GoalCrowdCelebrationDelay, PlayCrowdCelebration).SetUpdate(true);
+            m_CrowdCelebrationTween?.Kill();
+            m_CrowdCelebrationTween = DOVirtual.DelayedCall(m_AudioConfig.GoalCrowdCelebrationDelay, PlayCrowdCelebration)
+                .SetUpdate(true)
+                .SetLink(gameObject);
             if (m_AudioConfig.Goal.Clip != null)
             {
                 PlayCue(m_AudioConfig.Goal);
@@ -183,7 +188,10 @@ namespace Foosball.Presentation
             m_MusicSource.volume = 0f;
             m_MusicSource.Play();
             m_MusicBaseVolume = m_AudioConfig.MusicVolume;
-            DOTween.To(() => m_MusicSource.volume, v => m_MusicSource.volume = v, m_AudioConfig.MusicVolume, m_AudioConfig.MusicFadeDuration).SetUpdate(true);
+            m_MusicFadeTween?.Kill();
+            m_MusicFadeTween = DOTween.To(() => m_MusicSource.volume, v => m_MusicSource.volume = v, m_AudioConfig.MusicVolume, m_AudioConfig.MusicFadeDuration)
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         private void StopPlaylist()
@@ -220,7 +228,8 @@ namespace Foosball.Presentation
                 .Append(DOTween.To(() => m_MusicSource.volume, v => m_MusicSource.volume = v, ducked, fadeIn))
                 .AppendInterval(hold)
                 .Append(DOTween.To(() => m_MusicSource.volume, v => m_MusicSource.volume = v, m_MusicBaseVolume, fadeOut))
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
     #endregion
     }

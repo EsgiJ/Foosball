@@ -45,7 +45,8 @@ public class GameJuiceManager : MonoBehaviour
         Time.timeScale = 0f;
 
         m_TimeScaleTween = DOVirtual.DelayedCall(duration, () => Time.timeScale = 1f, false)
-            .SetUpdate(true);
+            .SetUpdate(true)
+            .SetLink(gameObject);
     }
 
     public void ShakeCamera(float duration = -1f, float strength = -1f)
@@ -70,7 +71,7 @@ public class GameJuiceManager : MonoBehaviour
 
         m_TimeScaleTween?.Kill();
 
-        Sequence seq = DOTween.Sequence().SetUpdate(true);
+        Sequence seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
         seq.Append(DOTween.To(() => Time.timeScale, x => Time.timeScale = x, scale, m_JuiceConfig.SlowMoEaseIn).SetEase(Ease.OutQuad));
         seq.AppendInterval(holdDur);
         seq.Append(DOTween.To(() => Time.timeScale, x => Time.timeScale = x, 1f, m_JuiceConfig.SlowMoEaseOut).SetEase(Ease.InQuad));

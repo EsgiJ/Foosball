@@ -28,6 +28,8 @@ namespace Foosball.Gameplay
         [SerializeField] private TextMeshPro m_CountdownText;
         private Vector3 m_CountdownOriginalScale;
         private Tween m_KickoffTween;
+        private Tween m_KickoffBallMoveTween;
+        private Tween m_GoalWaitTween;
 
         [Header("UI")]
         [SerializeField] private TextMeshPro m_HomeTeamScoreUI;
@@ -122,11 +124,14 @@ namespace Foosball.Gameplay
             var scoreText = isHome ? m_HomeScoreText : m_AwayScoreText;
             scoreText.transform.DOKill();
             scoreText.transform.localScale = Vector3.one;
-            scoreText.transform.DOPunchScale(Vector3.one * 0.5f, 0.4f, 8, 0.7f);
+            scoreText.transform.DOPunchScale(Vector3.one * 0.5f, 0.4f, 8, 0.7f).SetLink(scoreText.gameObject);
             Debug.Log($"[GameManager] {m_HomeTeam.teamName} {m_MatchState.HomeScore} - {m_AwayTeam.teamName} {m_MatchState.AwayScore}");
 
             m_GameStateManager.GoToGoal();
-            DOVirtual.DelayedCall(m_MatchSettings.GoalWaitDuration,() => m_GameStateManager.StartCountdown()).SetUpdate(true);
+            m_GoalWaitTween?.Kill();
+            m_GoalWaitTween = DOVirtual.DelayedCall(m_MatchSettings.GoalWaitDuration, () => m_GameStateManager.StartCountdown())
+                .SetUpdate(true)
+                .SetLink(gameObject);
         }
 
         private void ResetGame()
@@ -156,7 +161,7 @@ namespace Foosball.Gameplay
                 m_BallController.ResetBall();
 
             // SetUpdate(true) to not get affected by the slow mo
-            DG.Tweening.Sequence seq = DOTween.Sequence().SetUpdate(true);
+            DG.Tweening.Sequence seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
 
             seq.AppendCallback(() =>
             {
@@ -169,9 +174,11 @@ namespace Foosball.Gameplay
             {
                 if (m_BallController != null)
                 {
-                    m_BallController.transform.DOMove(Vector3.zero, m_MatchSettings.KickoffBallMoveDuration)
+                    m_KickoffBallMoveTween?.Kill();
+                    m_KickoffBallMoveTween = m_BallController.transform.DOMove(Vector3.zero, m_MatchSettings.KickoffBallMoveDuration)
                         .SetEase(Ease.InOutQuad)
-                        .SetUpdate(true);
+                        .SetUpdate(true)
+                        .SetLink(m_BallController.gameObject);
                 }
             });
 
@@ -224,18 +231,21 @@ namespace Foosball.Gameplay
             m_CountdownText.transform
                 .DOScale(targetScale, 0.3f)
                 .SetEase(Ease.OutBack)
-                .SetUpdate(true);
+                .SetUpdate(true)
+                .SetLink(m_CountdownText.gameObject);
 
             var color = m_CountdownText.color;
             color.a = 0f;
             m_CountdownText.color = color;
-            m_CountdownText.DOFade(1f, 0.2f).SetUpdate(true);
+            m_CountdownText.DOKill();
+            m_CountdownText.DOFade(1f, 0.2f).SetUpdate(true).SetLink(m_CountdownText.gameObject);
 
             if (isFinal)
             {
                 m_CountdownText.transform
                     .DOPunchRotation(new Vector3(0, 0, 10f), 0.4f, 8, 0.7f)
-                    .SetUpdate(true);
+                    .SetUpdate(true)
+                    .SetLink(m_CountdownText.gameObject);
             }
         }
     #endregion

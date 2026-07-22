@@ -1,4 +1,3 @@
-using DG.Tweening;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
@@ -36,7 +35,6 @@ namespace Foosball.Gameplay
 
         private float m_LastUpdateTime = -999f;
         private bool m_IsVisible = false;
-        private Tween m_FadeTween;
 
     #region Unity Lifecycle
         private void Start()
@@ -158,7 +156,6 @@ namespace Foosball.Gameplay
 
         public void ResetTrajectory()
         {
-            m_FadeTween?.Kill();
             m_IsVisible = false;
             m_LastUpdateTime = -999f;
 
