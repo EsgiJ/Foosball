@@ -3,7 +3,7 @@ using Infrastructure;
 using Foosball.Presentation;
 using Foosball.Gameplay;
 
-namespace Foosball.Core
+namespace Foosball.App
 {
     [DefaultExecutionOrder(-1000)]
     public class GameBootstrap : MonoBehaviour
@@ -32,30 +32,31 @@ namespace Foosball.Core
             WireMainMenus();
             WirePauseMenus();
             WireStatePanels();
+            WireMatchFeedback();
         }
 
         private void WireGameManagers()
         {
             foreach (var gameManager in FindObjectsByType<GameManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                gameManager.Init(m_AudioManager, m_RumbleManager, m_GameJuiceManager, m_GameStateManager, m_EventBus);
+                gameManager.Init(m_GameStateManager, m_EventBus);
         }
 
         private void WireTeams()
         {
             foreach (var team in FindObjectsByType<TeamController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                team.Init(m_GameJuiceManager);
+                team.Init(m_EventBus);
         }
 
         private void WireRods()
         {
             foreach (var rod in FindObjectsByType<RodController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                rod.Init(m_AudioManager, m_RumbleManager, m_VFXManager, m_GameJuiceManager, m_AimTrajectory, m_GameStateManager, m_EventBus);
+                rod.Init(m_AimTrajectory, m_GameStateManager, m_EventBus);
         }
 
         private void WireBalls()
         {
             foreach (var ball in FindObjectsByType<BallController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-                ball.Init(m_AudioManager, m_VFXManager, m_GameStateManager, m_EventBus);
+                ball.Init(m_GameStateManager, m_EventBus);
         }
 
         private void WireButtons()
@@ -104,6 +105,12 @@ namespace Foosball.Core
         {
             foreach (var panel in FindObjectsByType<StatePanel>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 panel.Init(m_GameStateManager);
+        }
+
+        private void WireMatchFeedback()
+        {
+            foreach (var feedback in FindObjectsByType<MatchFeedbackController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                feedback.Init(m_AudioManager, m_VFXManager, m_RumbleManager, m_GameJuiceManager, m_GameStateManager, m_EventBus);
         }
     }
 }

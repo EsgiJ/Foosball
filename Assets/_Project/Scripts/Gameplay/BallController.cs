@@ -3,7 +3,6 @@ using UnityEngine;
 
 using Infrastructure;
 using Foosball.Data;
-using Foosball.Presentation;
 
 namespace Foosball.Gameplay
 {
@@ -13,8 +12,6 @@ namespace Foosball.Gameplay
         [SerializeField] private BallConfig m_BallConfig;
 
         /* Injected dependencies */
-        private VFXManager m_VFXManager;
-        private AudioManager m_AudioManager;
         private GameStateManager m_GameStateManager;
         private EventBus m_EventBus;
 
@@ -37,10 +34,8 @@ namespace Foosball.Gameplay
         private Tween m_PendingShootTween;
 
     #region Unity Lifecycle
-        public void Init(AudioManager audioManager, VFXManager vfxManager, GameStateManager gameStateManager, EventBus eventBus)
+        public void Init(GameStateManager gameStateManager, EventBus eventBus)
         {
-            m_AudioManager = audioManager;
-            m_VFXManager = vfxManager;
             m_GameStateManager = gameStateManager;
             m_EventBus = eventBus;
 
@@ -100,17 +95,13 @@ namespace Foosball.Gameplay
             if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Home"))
             {
                 // false because away scored
-                m_EventBus?.Publish(new GoalEvent { IsHome = false });
-                m_AudioManager?.PlayGoal();
-                m_VFXManager?.PlayGoal(transform.position);
+                m_EventBus?.Publish(new GoalEvent { IsHome = false, Position = transform.position });
             }
 
             if(collision.gameObject.CompareTag("Goal_Trigger_Zone_Away"))
             {
                 // true because home scored
-                m_EventBus?.Publish(new GoalEvent { IsHome = true });
-                m_AudioManager?.PlayGoal();
-                m_VFXManager?.PlayGoal(transform.position);
+                m_EventBus?.Publish(new GoalEvent { IsHome = true, Position = transform.position });
             }
         }
 
@@ -124,10 +115,14 @@ namespace Foosball.Gameplay
                 return;
 
             float vol = Mathf.Clamp01(impact / m_BallConfig.WallBounceMaxImpact);
-            m_AudioManager?.PlayWallBounce(vol);
-
             ContactPoint c = collision.GetContact(0);
-            m_VFXManager?.PlayWallHit(c.point, Mathf.Lerp(m_BallConfig.WallHitVFXScaleMin, m_BallConfig.WallHitVFXScaleMax, vol));
+
+            m_EventBus?.Publish(new WallBounceEvent
+            {
+                Position = c.point,
+                Volume = vol,
+                VfxScale = Mathf.Lerp(m_BallConfig.WallHitVFXScaleMin, m_BallConfig.WallHitVFXScaleMax, vol)
+            });
         }
     #endregion
 

@@ -11,6 +11,7 @@ namespace Foosball.Core
         public int AwayScore { get; private set; }
         public bool IsMatchOver { get; private set; }
         public bool HomeWon { get; private set; }
+        public float ElapsedSeconds { get; private set; }
 
         public event Action<int, int> ScoreChanged;
         public event Action<bool> MatchWon;
@@ -37,12 +38,28 @@ namespace Foosball.Core
             }
         }
 
+        public void Tick(float deltaTime)
+        {
+            if (IsMatchOver)
+                return;
+
+            ElapsedSeconds += deltaTime;
+
+            if (ElapsedSeconds >= m_Settings.TimeLimitSeconds)
+            {
+                IsMatchOver = true;
+                HomeWon = HomeScore > AwayScore;
+                MatchWon?.Invoke(HomeWon);
+            }
+        }
+
         public void Reset()
         {
             HomeScore = 0;
             AwayScore = 0;
             IsMatchOver = false;
             HomeWon = false;
+            ElapsedSeconds = 0f;
             ScoreChanged?.Invoke(HomeScore, AwayScore);
         }
     }

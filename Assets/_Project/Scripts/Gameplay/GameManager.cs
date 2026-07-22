@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Infrastructure;
 using Foosball.Data;
-using Foosball.Presentation;
 using Foosball.Core;
 
 namespace Foosball.Gameplay
@@ -36,19 +35,13 @@ namespace Foosball.Gameplay
         [SerializeField] private TextMeshPro m_ScoreDashUI;
 
         /* Injected dependencies */
-        private RumbleManager m_RumbleManager;
-        private GameJuiceManager m_GameJuiceManager;
-        private AudioManager m_AudioManager;
         private GameStateManager m_GameStateManager;
         private EventBus m_EventBus;
         private MatchState m_MatchState;
 
     #region Unity Lifecycle
-        public void Init(AudioManager audioManager, RumbleManager rumbleManager, GameJuiceManager gameJuiceManager, GameStateManager gameStateManager, EventBus eventBus)
+        public void Init(GameStateManager gameStateManager, EventBus eventBus)
         {
-            m_AudioManager = audioManager;
-            m_RumbleManager = rumbleManager;
-            m_GameJuiceManager = gameJuiceManager;
             m_GameStateManager = gameStateManager;
             m_EventBus = eventBus;
         }
@@ -65,7 +58,6 @@ namespace Foosball.Gameplay
             SubscribeToEvents();
             if (m_CountdownText != null)
                 m_CountdownOriginalScale = m_CountdownText.transform.localScale;
-            m_AudioManager?.PlayMenuMusic();
         }
 
         void Update()
@@ -122,13 +114,7 @@ namespace Foosball.Gameplay
 
             var scorer   = isHome ? m_HomeTeam.AssignedGamepad : m_AwayTeam.AssignedGamepad;
             var conceder = isHome ? m_AwayTeam.AssignedGamepad : m_HomeTeam.AssignedGamepad;
-            m_RumbleManager?.RumbleGoal(scorer, conceder);
-
-            m_GameJuiceManager?.ChromaticAberrationEffect();
-            m_GameJuiceManager?.PauseGame(0.1f);
-            m_GameJuiceManager?.SlowMotion(0.3f, 0.6f);
-            m_GameJuiceManager?.ShakeCamera(0.5f, 0.6f);
-            m_GameJuiceManager?.VignetteEffect();
+            m_EventBus?.Publish(new GoalFeedbackEvent { Scorer = scorer, Conceder = conceder });
 
             UpdateScoreboard();
 
@@ -195,12 +181,12 @@ namespace Foosball.Gameplay
             {
                 int captured = i;
                 seq.AppendCallback(() => ShowCountdownNumber(numbers[captured].ToString()));
-                seq.JoinCallback(() => m_AudioManager?.PlayCountdownTick());
+                seq.JoinCallback(() => m_EventBus?.Publish(new CountdownTickEvent()));
                 seq.AppendInterval(m_MatchSettings.CountdownTickInterval);
             }
 
             seq.AppendCallback(() => ShowCountdownNumber("GO!", true));
-            seq.JoinCallback(() => m_AudioManager?.PlayCountdownGo());
+            seq.JoinCallback(() => m_EventBus?.Publish(new CountdownGoEvent()));
 
             seq.AppendInterval(m_MatchSettings.CountdownGoHoldDuration);
 
@@ -263,17 +249,11 @@ namespace Foosball.Gameplay
             if (isFrozen)       Time.timeScale = 0f;
             else if (wasFrozen) Time.timeScale = 1f;
 
-            m_AudioManager?.SetMusicPaused(isFrozen);
-
             switch (next)
             {
                 case GameState.Countdown:
                     DisableInput();
                     BeginControl();
-                    if (previous == GameState.Setup)
-                    {
-                        m_AudioManager?.PlayGameplayMusic();
-                    }
                     StartKickoffSequence();
                     break;
 
@@ -286,8 +266,6 @@ namespace Foosball.Gameplay
                 case GameState.Paused:
                     DisableInput();
                     Time.timeScale = 0f;
-                    m_RumbleManager?.StopAll();
-                    m_AudioManager?.SetMusicPaused(true);
                     break;
 
                 case GameState.Goal:
@@ -296,15 +274,12 @@ namespace Foosball.Gameplay
 
                 case GameState.Setup:
                     EndControl();
-                    m_GameJuiceManager?.VignetteEffect();
-                    m_AudioManager?.PlayMenuMusic();
                     break;
 
                 case GameState.MainMenu:
                     DisableInput();
                     EndControl();
                     ResetGame();
-                    m_AudioManager?.PlayMenuMusic();
                     break;
             }
         }

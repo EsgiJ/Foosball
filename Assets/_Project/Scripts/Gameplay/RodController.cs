@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 using QuickOutline;
 using Infrastructure;
 using Foosball.Data;
-using Foosball.Presentation;
 
 namespace Foosball.Gameplay
 {
@@ -47,10 +46,6 @@ namespace Foosball.Gameplay
 
         /* Injected dependencies */
         private AimTrajectory m_AimTrajectory;
-        private RumbleManager m_RumbleManager;
-        private VFXManager m_VFXManager;
-        private GameJuiceManager m_GameJuiceManager;
-        private AudioManager m_AudioManager;
         private GameStateManager m_GameStateManager;
         private EventBus m_EventBus;
 
@@ -99,12 +94,8 @@ namespace Foosball.Gameplay
     #endregion
 
     #region Unity Lifecycle
-        public void Init(AudioManager audioManager, RumbleManager rumbleManager, VFXManager vfxManager, GameJuiceManager gameJuiceManager, AimTrajectory aimTrajectory, GameStateManager gameStateManager, EventBus eventBus)
+        public void Init(AimTrajectory aimTrajectory, GameStateManager gameStateManager, EventBus eventBus)
         {
-            m_AudioManager = audioManager;
-            m_RumbleManager = rumbleManager;
-            m_VFXManager = vfxManager;
-            m_GameJuiceManager = gameJuiceManager;
             m_AimTrajectory = aimTrajectory;
             m_GameStateManager = gameStateManager;
             m_EventBus = eventBus;
@@ -248,7 +239,7 @@ namespace Foosball.Gameplay
                 m_StanceAction.canceled += OnStanceReleased;
                 m_PassAction.started   += OnPassPressed;
                 m_DashAction.started   += OnDashPressed;
-                m_AudioManager?.PlayPossessSwitch();
+                m_EventBus?.Publish(new PossessSwitchEvent());
                 PlayWiggleEffect();
                 ShowOutline();
             }
@@ -405,7 +396,6 @@ namespace Foosball.Gameplay
 
             SetState(ERodState.Shooting);
             m_EventBus?.Publish(new ShootEvent { Direction = m_AimVector });
-            m_AudioManager?.PlayShoot();
 
             m_HasBall = false;
         }
@@ -441,8 +431,7 @@ namespace Foosball.Gameplay
                 return;
 
             m_IsPassing = true;
-            m_AudioManager?.PlayStanceClick();
-            m_GameJuiceManager?.ShakeCamera(0.08f, 0.1f);
+            m_EventBus?.Publish(new PassAttemptedEvent());
             PlayPassFlick(dir, target);
         }
 
@@ -500,7 +489,7 @@ namespace Foosball.Gameplay
             float baseZ = transform.localPosition.z;
             float target = Mathf.Clamp(baseZ + dir * m_DashDistance, m_RodConfig.MinZPos, m_RodConfig.MaxZPos);
 
-            m_AudioManager?.PlayStanceClick();
+            m_EventBus?.Publish(new DashAttemptedEvent());
 
             m_DashTween = DOTween.Sequence().SetLink(gameObject)
                 .Append(transform.DOLocalMoveZ(target, m_DashTime).SetEase(Ease.OutQuad))
@@ -584,7 +573,7 @@ namespace Foosball.Gameplay
 
         private void OnEnterDefenseStance()
         {
-            m_AudioManager?.PlayStanceClick();
+            m_EventBus?.Publish(new StanceChangedEvent());
             m_CurrentRotationTween = RotateRodTo(m_RodConfig.DefenseRotation, m_RodConfig.DefenseStanceDuration, m_RodConfig.DefenseStanceEase);
         }
 
@@ -593,7 +582,7 @@ namespace Foosball.Gameplay
             m_DashTween?.Kill();
             m_IsDashing = false;
 
-            m_AudioManager?.PlayStanceClick();
+            m_EventBus?.Publish(new StanceChangedEvent());
             float rodRotationBasedOnTeam = m_RodConfig.AttackRotation * (IsHomeTeam() ? 1 : -1);
             m_CurrentRotationTween = RotateRodTo(rodRotationBasedOnTeam, m_RodConfig.AttackStanceDuration, m_RodConfig.AttackStanceEase);
         }
@@ -601,15 +590,12 @@ namespace Foosball.Gameplay
         private void OnEnterShooting()
         {
             ReleaseBall();
-            m_GameJuiceManager?.ShakeCamera(0.15f, 0.2f);
             m_CurrentRotationTween = RotateRodTo(m_RodConfig.ShootRotation, m_RodConfig.ShootDuration, m_RodConfig.ShootEase)
                 .OnComplete(() => SetState(ERodState.Idle));
         }
 
         private void OnEnterStunned()
         {
-            m_AudioManager?.PlayStun();
-
             Quaternion target = m_StartRotation * Quaternion.Euler(0, m_RodConfig.ShootRotation, 0);
 
             Sequence seq = DOTween.Sequence().SetLink(gameObject);
@@ -618,9 +604,6 @@ namespace Foosball.Gameplay
             seq.OnComplete(() => SetState(ERodState.Idle));
 
             m_CurrentRotationTween = seq;
-
-            m_GameJuiceManager?.ShakeCamera(0.3f, 0.5f);
-            m_GameJuiceManager?.PauseGame(0.08f);
         }
 
         private Tween RotateRodTo(float angle, float duration, Ease ease)
@@ -652,14 +635,21 @@ namespace Foosball.Gameplay
 
             if (m_IsStanceHeld && m_CurrentRodState == ERodState.DefenseStance)
             {
-                float s = Mathf.Clamp(ball.GetLinearVelocity().magnitude / 15f, 0.6f, 1.5f);
-                m_VFXManager?.PlayBlock(contactingPlayer.position, s);
+                Vector3 ballVelocity = ball.GetLinearVelocity();
+                float s = Mathf.Clamp(ballVelocity.magnitude / 15f, 0.6f, 1.5f);
 
                 PlayStruggleEffect(ball);
                 ball.StopBall();
                 AttachBallToRod(ball, contactingPlayer);
-                m_AudioManager?.PlayDefenseCatch();
-                m_RumbleManager?.RumbleBlock(m_Gamepad);
+
+                m_EventBus?.Publish(new BlockEvent
+                {
+                    Position = contactingPlayer.position,
+                    VfxScale = s,
+                    BallVelocityX = ballVelocity.x,
+                    BallSpeed = ballVelocity.magnitude,
+                    Gamepad = m_Gamepad
+                });
 
                 SetState(ERodState.AttackStance);
             }
@@ -671,8 +661,7 @@ namespace Foosball.Gameplay
 
         public void HandleStun(BallController ball)
         {
-            m_RumbleManager?.RumbleStun(m_Gamepad);
-            m_VFXManager?.PlayStun(ball.transform.position);
+            m_EventBus?.Publish(new RodStunnedEvent { Position = ball.transform.position, Gamepad = m_Gamepad });
             SetState(ERodState.Stunned);
         }
 
@@ -718,10 +707,6 @@ namespace Foosball.Gameplay
                 m_RodConfig.StruggleVibrato,
                 m_RodConfig.StruggleElasticity
             ).SetLink(gameObject);
-
-            m_GameJuiceManager?.ShakeCamera(0.15f, intensity * 0.25f);
-            if (intensity > 0.6f)
-                m_GameJuiceManager?.PauseGame(0.1f);
         }
     #endregion
 

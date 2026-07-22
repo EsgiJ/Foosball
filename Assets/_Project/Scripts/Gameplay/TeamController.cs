@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Infrastructure;
 
 namespace Foosball.Gameplay
 {
@@ -33,12 +34,12 @@ namespace Foosball.Gameplay
         [SerializeField] private float m_BallStartingNudge = 0.5f;
 
         /* Injected dependencies */
-        private GameJuiceManager m_GameJuiceManager;
+        private EventBus m_EventBus;
 
     #region Unity Lifecycle
-        public void Init(GameJuiceManager gameJuiceManager)
+        public void Init(EventBus eventBus)
         {
-            m_GameJuiceManager = gameJuiceManager;
+            m_EventBus = eventBus;
         }
 
         void Awake()
@@ -149,7 +150,7 @@ namespace Foosball.Gameplay
 
         private void ShakeTheTable()
         {
-            m_GameJuiceManager?.ShakeCamera(0.5f, 0.5f);
+            m_EventBus?.Publish(new TableShakenEvent());
 
             if (m_BallController != null)
             {

@@ -2304,7 +2304,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TeamController
   teamName: Red Team
-  score: 0
   m_RodControllers:
   - {fileID: 1852388206}
   - {fileID: 1890271145}
@@ -44163,6 +44162,50 @@ RectTransform:
   m_AnchoredPosition: {x: -200, y: 0}
   m_SizeDelta: {x: 400, y: 50}
   m_Pivot: {x: 1, y: 0.5}
+--- !u!1 &1152955907
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1152955909}
+  - component: {fileID: 1152955908}
+  m_Layer: 0
+  m_Name: MatchFeedbackController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1152955908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152955907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3521349241aca454a9092168d52b00c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Foosball.Presentation.MatchFeedbackController
+--- !u!4 &1152955909
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152955907}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 5.08, y: 3.556, z: 5.08}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1159758097
 GameObject:
   m_ObjectHideFlags: 0
@@ -52592,7 +52635,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TeamController
   teamName: Home Team
-  score: 0
   m_RodControllers:
   - {fileID: 2033690545}
   - {fileID: 621418582}
@@ -54171,3 +54213,4 @@ SceneRoots:
   - {fileID: 237094933}
   - {fileID: 221760018}
   - {fileID: 897249396}
+  - {fileID: 1152955909}
